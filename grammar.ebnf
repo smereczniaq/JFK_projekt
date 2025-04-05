@@ -1,0 +1,50 @@
+
+- program                           = {function_definition};
+- function_definition               = "def", identifier, "(" [type, ["&"], identifier, {",",["mut"], type , ["&"], identifier}], ")", [":",type], "{", {statement}, "}"; 
+- statement                         = while_loop | for_loop | if_statement | variable_instantiation | list_declaration | value_assignment | pattern_match | (expression, ";") | return_statement | "break;" | "continue;";
+- return_statement                  = "return", [expression], ";";
+
+(*CODE BLOCKS*)
+- while_loop                        = "while", expression,  "{", {statement}, "}";
+- for_loop                          = "for", type, identifier, "in", "&", (identifier | function_call | string | list), "{", {statement}, "}"; 
+- if_statement                      = "if", expression ,"{", {statement}, "}", {"else if", expression, "{", {statement}, "}"}, ["else", "{", {statement}, "}"];
+
+(*PATTERN MATCHING*)
+- pattern_match                     = "match", expression, ["as", ["mut"], type, identifier] "{", {pattern_rule}, default_pattern_rule, "}"; 
+- pattern_rule                      = expression, {",", expression}, "{" {statement}, "}";
+- default_pattern_rule              = "default", "{",{statement}, "}";
+
+(*STATEMENTS*)
+- function_call                     = identifier, "(" [expression], {",", expression}, ")";
+- variable_instantiation            = "var", ["mut"], type, identifier, ["=",["&"], expression], ";";
+- list_access                       = expression, "[", expression, "]";
+- value_assignment                  = expression, "=", expression, ";";
+
+(* EXPRESSION*)
+- expression                        = or_operand, {"||", or_operand};
+- or_operand                        = and_operand, {"&&", and_operand};
+- and_operand                       = comparison_operand, [("==" | "!=" | "<" | ">" | "<=" | ">="), comparison_operand];
+- comparison_operand                = addend, {("+" | "-"), addend};
+- addend                            = term, {("*" | "/"), term};
+- term                              = exponentiation_operand, {"^", exponentiation_operand};
+- exponentiation_operand            = ("(", expression, ")") | literal | identifier | function_call | list_access | pattern_match;
+
+DODAĆ XOR NEG short-circuit boolean evaluation
+
+(*SIMPLE DEFINITIONS*)
+- identifier                        = ("_" | letter) , {"_" | letter | digit};  
+- letter                            = "a" | "b" | "c" | ... | "z" | "A" | "B" | "C" | ... | "Z";
+- literal                           = integer | float | string | bool | list; 
+- type                              = "int"  | "float" | "string" | "bool" | ("list<", type, ">");
+- list                              = "[" expression, {",", expression} "]";
+- bool                              = "True" | "False";
+- string                            = "\"" , {letter} | " " | {special_character} | {new_line} | escaped_character, "\"";
+- escaped_character                 = "\\", special_character | "n" | "r";
+- special_character                 = "!" | "\"" | "#" | "$" | ... | "/" | ":" | ";" | ... | "@" | "[" | ... | "'" | "{" | "~";
+- float                             = integer , "." , digit, {digit};
+- integer                           = non_zero_digit | {digit};
+- digit                             = "0" | non_zero_digit;
+- non_zero_digit                    = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9";
+(*comment                           = "#" means ignore all characters afterward, until newline occurs or end of file*)
+
+obsługa liczb o różnej precyzji (np. Float32, Float64)
