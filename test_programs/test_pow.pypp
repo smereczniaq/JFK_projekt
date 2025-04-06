@@ -1,0 +1,25 @@
+// Testy operatora potęgowania (^)
+
+var res1 = 2 ^ 3;
+print(res1); // oczekiwane: 8
+
+var res2 = 3 ^ 2;
+print(res2); // oczekiwane: 9
+
+var res3 = 5 ^ 0;
+print(res3); // oczekiwane: 1
+
+var res4 = 1 ^ 100;
+print(res4); // oczekiwane: 1
+
+var res5 = 0 ^ 3;
+print(res5); // oczekiwane: 0
+
+var res6 = 2 ^ 3 ^ 2;
+print(res6); // oczekiwane: 512 (bo 2 ^ (3 ^ 2))
+
+var res7 = 2 ^ (3 ^ 2);
+print(res7); // oczekiwane: 512
+
+var res8 = (2 ^ 3) ^ 2;
+print(res8); // oczekiwane: 64

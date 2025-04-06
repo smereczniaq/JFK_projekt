@@ -1,0 +1,32 @@
+// Podstawowe użycie:
+var a = read();
+print(a); // oczekiwane: wartość wpisana przez użytkownika
+
+// Dodawanie do liczby:
+print(read() + 10); // wpisz np. 5, powinno wypisać 15
+
+// Złożone wyrażenie:
+var b = 2 * read() + 3;
+print(b); // wpisz np. 4, oczekiwane: 2*4+3 = 11
+
+// Wewnątrz logicznego AND:
+var t = 1;
+var x = read();     // wpisz np. 1
+var res = t && x;
+print(res); // oczekiwane: 1 (jeśli x ≠ 0), 0 (jeśli x == 0)
+
+// Wewnątrz porównania:
+var y = read(); // wpisz np. 42
+print(y == 42); // oczekiwane: 1 jeśli wpisano 42, 0 w innym przypadku
+
+// Zagnieżdżone read:
+var sum = read() + read(); // wpisz np. 3 ENTER 7
+print(sum); // oczekiwane: 10
+
+// Przypisanie do innej zmiennej:
+var z = read(); // wpisz 99
+var copy = z;
+print(copy); // oczekiwane: 99
+
+// Użycie w return:
+return read(); // wypisze wpisaną wartość jako exit code

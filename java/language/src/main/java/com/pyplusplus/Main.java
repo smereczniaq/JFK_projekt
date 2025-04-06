@@ -7,7 +7,18 @@ import org.antlr.v4.runtime.tree.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        CharStream input = CharStreams.fromFileName("example.pypp");
+        // String fileName = "test_programs/test_or.pypp";
+        // String fileName = "test_programs/test_xor.pypp";
+        // String fileName = "test_programs/test_and.pypp";
+        // String fileName = "test_programs/test_cmp.pypp";
+        // String fileName = "test_programs/test_pow.pypp";
+        // String fileName = "test_programs/test_math.pypp";
+        // String fileName = "test_programs/test_logic.pypp";
+        // String fileName = "test_programs/test_read.pypp";
+        // String fileName = "test_programs/test_read_contexts.pypp";
+        String fileName = "test_programs/test_errors.pypp";
+
+        CharStream input = CharStreams.fromFileName(fileName);
         PyPlusPlusLexer lexer = new PyPlusPlusLexer(input);
         lexer.removeErrorListeners(); // usuń domyślny
         lexer.addErrorListener(new SyntaxErrorListener());

@@ -22,26 +22,17 @@ public class LLVMActions extends PyPlusPlusBaseListener {
         if (symbolTable.containsKey(varName)) {
             throw new RuntimeException("Błąd semantyczny: zmienna '" + varName + "' została już zadeklarowana.");
         }
-        symbolTable.put(varName, "int"); // dla uproszczenia typ int
     
+        symbolTable.put(varName, "int"); // uproszczenie: wszystkie zmienne typu int
         generator.declareVariable(varName);
-    
+        System.out.println(ctx.expression());
         if (ctx.expression() != null) {
-            if (ctx.expression() instanceof PyPlusPlusParser.FunctionCallExprContext functionCtx) {
-                String functionName = functionCtx.function_call().IDENTIFIER().getText();
-                if (functionName.equals("read")) {
-                    // Upewnij się, że wartość z read() została wygenerowana
-                    String readValue = values.get(ctx.expression());
-                    generator.addMainInstruction("store i32 " + readValue + ", i32* @" + varName);
-                    return;
-                }
-            }
-        
             String valueReg = values.get(ctx.expression());
+    
             if (valueReg != null) {
                 generator.addMainInstruction("store i32 " + valueReg + ", i32* @" + varName);
             } else {
-                debug("Brak wartości dla 'var " + varName + "'");
+                debug("Brak wartości dla przypisania w 'var " + varName + "'");
             }
         }
     }
@@ -62,70 +53,149 @@ public class LLVMActions extends PyPlusPlusBaseListener {
             debug("Brak RHS dla przypisania do: " + lhsId);
         }
     }
-    
 
     @Override
-    public void exitMulExpr(PyPlusPlusParser.MulExprContext ctx) {
-        String operator = ctx.getChild(1).getText();
-        String left = values.get(ctx.expression(0));
-        String right = values.get(ctx.expression(1));
-        String result = generator.nextRegister();
-
-        if (operator.equals("*")) {
-            generator.addMainInstruction(result + " = mul i32 " + left + ", " + right);
-        } else if (operator.equals("/")) {
-            generator.addMainInstruction(result + " = sdiv i32 " + left + ", " + right);
-        }
-        values.put(ctx, result);
+    public void exitExpression(PyPlusPlusParser.ExpressionContext ctx) {
+        values.put(ctx, values.get(ctx.logicalOrExpr()));
     }
 
+
     @Override
-    public void exitAddExpr(PyPlusPlusParser.AddExprContext ctx) {
-        String operator = ctx.getChild(1).getText();
-        String left = values.get(ctx.expression(0));
-        String right = values.get(ctx.expression(1));
-        String result = generator.nextRegister();
+    public void exitLogicalOrExpr(PyPlusPlusParser.LogicalOrExprContext ctx) {
+        int count = ctx.xorExpr().size();
     
-        if (operator.equals("+")) {
-            generator.addMainInstruction(result + " = add i32 " + left + ", " + right);
-        } else if (operator.equals("-")) {
-            generator.addMainInstruction(result + " = sub i32 " + left + ", " + right);
-        }
-        values.put(ctx, result);
-    }
-
-    @Override
-    public void exitPowExpr(PyPlusPlusParser.PowExprContext ctx) {
-        String base = values.get(ctx.expression(0));
-        String exp = values.get(ctx.expression(1));
-        String result = generator.nextRegister();
-
-        // wywołanie naszej funkcji pomocniczej
-        generator.addMainInstruction(result + " = call i32 @powi(i32 " + base + ", i32 " + exp + ")");
-        if (base == null || exp == null) {
-            debug("Brakuje operandów dla potęgowania: base=" + base + ", exp=" + exp);
+        if (count == 1) {
+            values.put(ctx, values.get(ctx.xorExpr(0)));
             return;
         }
+    
+        String result = values.get(ctx.xorExpr(0));
+    
+        for (int i = 1; i < count; i++) {
+            String right = values.get(ctx.xorExpr(i));
+    
+            if (result == null || right == null) {
+                debug("Brakuje operandów dla ||");
+                return;
+            }
+    
+            // Konwersja operandów do i1
+            String leftCond = generator.nextRegister();
+            generator.addMainInstruction(leftCond + " = icmp ne i32 " + result + ", 0");
+    
+            String rightCond = generator.nextRegister();
+            generator.addMainInstruction(rightCond + " = icmp ne i32 " + right + ", 0");
+    
+            // OR logiczne
+            String orResult = generator.nextRegister();
+            generator.addMainInstruction(orResult + " = or i1 " + leftCond + ", " + rightCond);
+    
+            // Rozszerzenie do i32
+            result = generator.nextRegister();
+            generator.addMainInstruction(result + " = zext i1 " + orResult + " to i32");
+        }
+    
         values.put(ctx, result);
     }
+    
 
     @Override
-    public void exitParensExpr(PyPlusPlusParser.ParensExprContext ctx) {
-        // Po prostu przekaż wartość z wnętrza nawiasów dalej
-        String inner = values.get(ctx.expression());
-        values.put(ctx, inner);
+    public void exitXorExpr(PyPlusPlusParser.XorExprContext ctx) {
+        int count = ctx.logicalAndExpr().size();
+    
+        if (count == 1) {
+            values.put(ctx, values.get(ctx.logicalAndExpr(0)));
+            return;
+        }
+    
+        String result = values.get(ctx.logicalAndExpr(0));
+    
+        for (int i = 1; i < count; i++) {
+            String right = values.get(ctx.logicalAndExpr(i));
+    
+            if (result == null || right == null) {
+                debug("Brakuje operandów dla #");
+                return;
+            }
+    
+            // Konwersja operandów do i1
+            String leftCond = generator.nextRegister();
+            generator.addMainInstruction(leftCond + " = icmp ne i32 " + result + ", 0");
+    
+            String rightCond = generator.nextRegister();
+            generator.addMainInstruction(rightCond + " = icmp ne i32 " + right + ", 0");
+    
+            // XOR logiczne
+            String xorResult = generator.nextRegister();
+            generator.addMainInstruction(xorResult + " = xor i1 " + leftCond + ", " + rightCond);
+    
+            // Rozszerzenie do i32 — gotowe na kolejną iterację lub końcowy wynik
+            result = generator.nextRegister();
+            generator.addMainInstruction(result + " = zext i1 " + xorResult + " to i32");
+        }
+    
+        values.put(ctx, result);
     }
+    
+
+    @Override
+    public void exitLogicalAndExpr(PyPlusPlusParser.LogicalAndExprContext ctx) {
+        int count = ctx.comparisonExpr().size();
+    
+        if (count == 1) {
+            values.put(ctx, values.get(ctx.comparisonExpr(0)));
+            return;
+        }
+    
+        String result = values.get(ctx.comparisonExpr(0));
+    
+        for (int i = 1; i < count; i++) {
+            String right = values.get(ctx.comparisonExpr(i));
+    
+            if (result == null || right == null) {
+                debug("Brakuje operandów dla &&");
+                return;
+            }
+    
+            // Konwersja operandów do i1
+            String leftCond = generator.nextRegister();
+            generator.addMainInstruction(leftCond + " = icmp ne i32 " + result + ", 0");
+    
+            String rightCond = generator.nextRegister();
+            generator.addMainInstruction(rightCond + " = icmp ne i32 " + right + ", 0");
+    
+            // AND logiczne
+            String andResult = generator.nextRegister();
+            generator.addMainInstruction(andResult + " = and i1 " + leftCond + ", " + rightCond);
+    
+            // Rozszerzenie do i32 — gotowe na kolejną iterację lub użycie końcowe
+            result = generator.nextRegister();
+            generator.addMainInstruction(result + " = zext i1 " + andResult + " to i32");
+        }
+    
+        values.put(ctx, result);
+    }
+    
 
     @Override
     public void exitComparisonExpr(PyPlusPlusParser.ComparisonExprContext ctx) {
-        String left = values.get(ctx.expression(0));
-        String right = values.get(ctx.expression(1));
-        String result = generator.nextRegister();
+        int count = ctx.addExpr().size();
 
-        String op = ctx.getChild(1).getText(); // pobieramy operator jako środkowy child
+        if (count == 1) {
+            values.put(ctx, values.get(ctx.addExpr(0)));
+            return;
+        }
+    
+        if (ctx.addExpr().size() > 2) {
+            debug("Więcej niż jedno porównanie w jednym wyrażeniu – tylko pierwszy operator zostanie użyty");
+        }
+    
+        String left = values.get(ctx.addExpr(0));
+        String right = values.get(ctx.addExpr(1));
+        String operator = ctx.getChild(1).getText(); // operator między operandami
         String llvmOp;
-
-        switch(op) {
+    
+        switch(operator) {
             case "==": llvmOp = "eq"; break;
             case "!=": llvmOp = "ne"; break;
             case "<":  llvmOp = "slt"; break;
@@ -133,101 +203,256 @@ public class LLVMActions extends PyPlusPlusBaseListener {
             case ">":  llvmOp = "sgt"; break;
             case ">=": llvmOp = "sge"; break;
             default:
-                debug("Nieznany operator porównania: " + op);
+                debug("Nieznany operator porównania: " + operator);
                 return;
         }
-
+    
+        String result = generator.nextRegister();
         generator.addMainInstruction(result + " = icmp " + llvmOp + " i32 " + left + ", " + right);
-
-        // i1 trzeba zrzutować do i32, żeby móc używać np. w printf
+    
         String extended = generator.nextRegister();
         generator.addMainInstruction(extended + " = zext i1 " + result + " to i32");
-
-        values.put(ctx, extended); // do dalszego użycia (np. przypisania lub print)
+    
+        values.put(ctx, extended);
     }
+    
 
     @Override
-    public void exitLogicalOrExpr(PyPlusPlusParser.LogicalOrExprContext ctx) {
-        String left = values.get(ctx.expression(0));
-        String right = values.get(ctx.expression(1));
+    public void exitAddExpr(PyPlusPlusParser.AddExprContext ctx) {
+        int count = ctx.mulExpr().size();
+    
+        if (count == 1) {
+            values.put(ctx, values.get(ctx.mulExpr(0)));
+            return;
+        }
+    
+        String result = values.get(ctx.mulExpr(0));
+        if (result == null) {
+            debug("Brakuje lewego operandu w addExpr");
+            return;
+        }
+    
+        for (int i = 1; i < count; i++) {
+            String right = values.get(ctx.mulExpr(i));
+            String operator = ctx.getChild(2 * i - 1).getText(); // '+' lub '-'
+    
+            if (right == null) {
+                debug("Brakuje prawego operandu w addExpr");
+                return;
+            }
+    
+            String temp = generator.nextRegister();
+    
+            if (operator.equals("+")) {
+                generator.addMainInstruction(temp + " = add i32 " + result + ", " + right);
+            } else if (operator.equals("-")) {
+                generator.addMainInstruction(temp + " = sub i32 " + result + ", " + right);
+            } else {
+                debug("Nieznany operator w addExpr: " + operator);
+                return;
+            }
+    
+            result = temp;
+        }
+    
+        values.put(ctx, result);
+    }
+    
 
-        if (left == null || right == null) {
-            debug("Brakuje operandów dla ||");
+    @Override
+    public void exitMulExpr(PyPlusPlusParser.MulExprContext ctx) {
+        if (ctx.powExpr().size() == 1) {
+            values.put(ctx, values.get(ctx.powExpr(0)));
+            return;
+        }
+    
+        String result = values.get(ctx.powExpr(0));
+    
+        for (int i = 1; i < ctx.powExpr().size(); i++) {
+            String right = values.get(ctx.powExpr(i));
+            String operator = ctx.getChild(2 * i - 1).getText(); // operator jest między operandami
+    
+            String temp = generator.nextRegister();
+    
+            if (operator.equals("*")) {
+                generator.addMainInstruction(temp + " = mul i32 " + result + ", " + right);
+            } else if (operator.equals("/")) {
+                generator.addMainInstruction(temp + " = sdiv i32 " + result + ", " + right);
+            }
+    
+            result = temp;
+        }
+    
+        values.put(ctx, result);
+    }
+    
+
+    @Override
+    public void exitPowExpr(PyPlusPlusParser.PowExprContext ctx) {
+        String base = values.get(ctx.unaryExpr());
+        if (ctx.powExpr() == null) {
+            // tylko jedna wartość — przekazujemy w górę bez operacji
+            values.put(ctx, base);
             return;
         }
 
-        // Sprawdzenie, czy lewy operand jest różny od zera
-        String leftCond = generator.nextRegister();
-        generator.addMainInstruction(leftCond + " = icmp ne i32 " + left + ", 0");
-
-        // Sprawdzenie, czy prawy operand jest różny od zera
-        String rightCond = generator.nextRegister();
-        generator.addMainInstruction(rightCond + " = icmp ne i32 " + right + ", 0");
-
-        // OR logiczne na wynikach
-        String orResult = generator.nextRegister();
-        generator.addMainInstruction(orResult + " = or i1 " + leftCond + ", " + rightCond);
-
-        // Rozszerzamy do i32
-        String finalResult = generator.nextRegister();
-        generator.addMainInstruction(finalResult + " = zext i1 " + orResult + " to i32");
-
-        values.put(ctx, finalResult);
-    }
-
-    @Override
-    public void exitLogicalAndExpr(PyPlusPlusParser.LogicalAndExprContext ctx) {
-        String left = values.get(ctx.expression(0));
-        String right = values.get(ctx.expression(1));
-
-        if (left == null || right == null) {
-            debug("Brakuje operandów dla &&");
+        String exp = ctx.powExpr() != null ? values.get(ctx.powExpr()) : null;
+    
+        if (base == null || (ctx.powExpr() != null && exp == null)) {
+            debug("Brakuje operandów dla potęgowania");
             return;
         }
-
-        // Sprawdzenie, czy operand ≠ 0
-        String leftCond = generator.nextRegister();
-        generator.addMainInstruction(leftCond + " = icmp ne i32 " + left + ", 0");
-
-        String rightCond = generator.nextRegister();
-        generator.addMainInstruction(rightCond + " = icmp ne i32 " + right + ", 0");
-
-        // AND logiczne
-        String andResult = generator.nextRegister();
-        generator.addMainInstruction(andResult + " = and i1 " + leftCond + ", " + rightCond);
-
-        // Rozszerzenie do i32
-        String finalResult = generator.nextRegister();
-        generator.addMainInstruction(finalResult + " = zext i1 " + andResult + " to i32");
-
-        values.put(ctx, finalResult);
+    
+        String result;
+        if (exp != null) {
+            result = generator.nextRegister();
+            generator.addMainInstruction(result + " = call i32 @powi(i32 " + base + ", i32 " + exp + ")");
+        } else {
+            result = base; // bez potęgowania, tylko pojedynczy operand
+        }
+    
+        values.put(ctx, result);
     }
 
     @Override
-    public void exitLiteralExpr(PyPlusPlusParser.LiteralExprContext ctx) {
+    public void exitUnaryExpr(PyPlusPlusParser.UnaryExprContext ctx) {
+        if (ctx.getChildCount() == 2 && ctx.getChild(0).getText().equals("!")) {
+            if (ctx.unaryExpr() == null) {
+                debug("Brak operandu dla operatora !");
+                return;
+            }
+    
+            String operand = values.get(ctx.unaryExpr());
+    
+            if (operand == null) {
+                debug("Operand ! nie ma wartości");
+                return;
+            }
+    
+            // Konwersja do boola
+            String condition = generator.nextRegister();
+            generator.addMainInstruction(condition + " = icmp ne i32 " + operand + ", 0");
+    
+            // Negacja logiczna (odwrócenie wartości boola)
+            String notResult = generator.nextRegister();
+            generator.addMainInstruction(notResult + " = xor i1 " + condition + ", true");
+    
+            // Rozszerzenie i1 -> i32
+            String finalResult = generator.nextRegister();
+            generator.addMainInstruction(finalResult + " = zext i1 " + notResult + " to i32");
+    
+            values.put(ctx, finalResult);
+        } else if (ctx.primary() != null) {
+            String val = values.get(ctx.primary());
+            values.put(ctx, val);
+        } else {
+            debug("Nieznana forma unaryExpr: " + ctx.getText());
+        }
+    }
+    
+    
+    // @Override
+    // public void exitParensExpr(PyPlusPlusParser.ParensExprContext ctx) {
+    //     // Po prostu przekaż wartość z wnętrza nawiasów dalej
+    //     String inner = values.get(ctx.expression());
+    //     values.put(ctx, inner);
+    // }
+
+    // @Override
+    // public void exitLiteralExpr(PyPlusPlusParser.LiteralExprContext ctx) {
+    //     values.put(ctx, values.get(ctx.literal()));
+    // }
+
+    @Override
+    public void exitLiteral(PyPlusPlusParser.LiteralContext ctx) {
         String val = ctx.getText();
         String reg = generator.nextRegister();
         generator.addMainInstruction(reg + " = add i32 0, " + val);
         values.put(ctx, reg);
-    }
+    }    
 
     @Override
-    public void exitIdentifierExpr(PyPlusPlusParser.IdentifierExprContext ctx) {
-        String varName = ctx.getText();
+    public void exitPrimary(PyPlusPlusParser.PrimaryContext ctx) {
+        if (ctx.IDENTIFIER() != null) {
+            String varName = ctx.IDENTIFIER().getText();
     
-        if (!symbolTable.containsKey(varName)) {
-            throw new RuntimeException("Błąd semantyczny: zmienna '" + varName + "' nie została zadeklarowana.");
+            if (!symbolTable.containsKey(varName)) {
+                throw new RuntimeException("Błąd semantyczny: zmienna '" + varName + "' nie została zadeklarowana.");
+            }
+    
+            String reg = generator.nextRegister();
+            generator.addMainInstruction(reg + " = load i32, i32* @" + varName);
+            values.put(ctx, reg);
         }
     
-        String reg = generator.nextRegister();
-        generator.addMainInstruction(reg + " = load i32, i32* @" + varName);
-        values.put(ctx, reg);
+        else if (ctx.literal() != null) {
+            values.put(ctx, values.get(ctx.literal()));
+        }
+    
+        else if (ctx.function_call() != null) {
+            String functionName = ctx.function_call().IDENTIFIER().getText();
+        
+            if (functionName.equals("print")) {
+                if (ctx.function_call().expression(0) != null) {
+                    String argValue = values.get(ctx.function_call().expression(0));
+                    if (argValue != null) {
+                        String dummy = generator.nextRegister(); // zabezpieczenie rejestru
+                        generator.addMainInstruction(
+                            dummy + " = call i32 (i8*, ...) @printf(i8* getelementptr inbounds " +
+                            "([4 x i8], [4 x i8]* @format, i32 0, i32 0), i32 " + argValue + ")"
+                        );
+                    } else {
+                        debug("Brak wartości do wypisania w print()");
+                    }
+                }
+                values.put(ctx, "0");
+            }
+        
+            else if (functionName.equals("read")) {
+                // rejestr na wskaźnik alloca
+                String allocaReg = generator.nextRegister();
+                generator.addMainInstruction(allocaReg + " = alloca i32");
+        
+                // przypisz wywołanie scanf do dummy żeby zarejestrować użycie
+                String dummy = generator.nextRegister();
+                generator.addMainInstruction(
+                    dummy + " = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds " +
+                    "([3 x i8], [3 x i8]* @read_format, i32 0, i32 0), i32* " + allocaReg + ")"
+                );
+        
+                // załaduj wartość wczytaną z pamięci
+                String loadReg = generator.nextRegister();
+                generator.addMainInstruction(loadReg + " = load i32, i32* " + allocaReg);
+        
+                values.put(ctx, loadReg);
+            }
+        
+            else {
+                debug("Nieznana funkcja: " + functionName);
+            }
+        }
+        
+    
+        else if (ctx.list_access() != null) {
+            values.put(ctx, values.get(ctx.list_access()));
+        }
+    
+        else if (ctx.expression() != null) {
+            values.put(ctx, values.get(ctx.expression())); // nawiasy
+        }
+    
+        else {
+            debug("Nieznany przypadek w primary: " + ctx.getText());
+        }
     }
+    
+    
 
     @Override
     public void exitReturn_statement(PyPlusPlusParser.Return_statementContext ctx) {
         if (ctx.expression() != null) {
             String val = values.get(ctx.expression());
+            System.out.println(val);
             if (val != null) {
                 generator.addMainInstruction("ret i32 " + val);
             } else {
@@ -239,42 +464,9 @@ public class LLVMActions extends PyPlusPlusBaseListener {
         }
     }
 
-    @Override
-    public void exitFunctionCallExpr(PyPlusPlusParser.FunctionCallExprContext ctx) {
-        String functionName = ctx.function_call().IDENTIFIER().getText();
-
-        // Obsługa specjalna dla print()
-        if (functionName.equals("print")) {
-            if (ctx.function_call().expression(0) != null) {
-                String argValue = values.get(ctx.function_call().expression(0));
-                if (argValue != null) {
-                    generator.addMainInstruction(
-                        "call i32 (i8*, ...) @printf(i8* getelementptr inbounds " +
-                        "([4 x i8], [4 x i8]* @format, i32 0, i32 0), i32 " + argValue + ")"
-                    );
-                } else {
-                    debug("Brak wartości do wypisania w print()");
-                }
-            }
-        } else if (functionName.equals("read")) {
-
-            String allocaReg = "%read_tmp";
-            generator.addMainInstruction(allocaReg + " = alloca i32");
-            
-            generator.addMainInstruction(
-                "call i32 (i8*, ...) @scanf(i8* getelementptr inbounds " +
-                "([3 x i8], [3 x i8]* @read_format, i32 0, i32 0), i32* " + allocaReg + ")"
-            );
-            
-            String loadReg = generator.nextRegister();
-            generator.addMainInstruction(loadReg + " = load i32, i32* " + allocaReg);
-            values.put(ctx, loadReg);
-                    
-        }
-    }
-
-
     public String getLLVMCode() {
         return generator.generate();
     }
 }
+
+// CHECKPOINT;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

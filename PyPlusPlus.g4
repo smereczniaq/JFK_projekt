@@ -23,7 +23,7 @@ while_loop: 'while' expression '{' statement* '}';
 
 for_loop: 'for' IDENTIFIER 'in' (IDENTIFIER | function_call | STRING | literal_list) '{' statement* '}';
 
-if_statement: 'if' expression '{' statement* '}' ('else if' expression '{' statement* '}')* ('else' '{' statement* '}')?;
+if_statement: 'if' expression '{' statement* '}' ( 'else' 'if' expression '{' statement* '}' )* ( 'else' '{' statement* '}' )?;
 
 function_call: IDENTIFIER '(' (expression (',' expression)*)? ')';
 
@@ -35,22 +35,22 @@ list_access: IDENTIFIER '[' expression ']';
 
 value_assignment: expression '=' expression ';';
 
-expression
-    : expression '||' expression      # logicalOrExpr
-    | expression '#' expression       # xorExpr
-    | expression '&&' expression      # logicalAndExpr
-    | expression ('==' | '!=' | '<' | '>' | '<=' | '>=') expression # comparisonExpr
-    | expression ('+' | '-') expression   # addExpr
-    | expression ('*' | '/') expression   # mulExpr
-    | expression '^' expression       # powExpr
-    | '!' expression                  # notExpr
-    | '(' expression ')'             # parensExpr
-    | list_access                    # listAccessExpr
-    | function_call                  # functionCallExpr
-    | literal                        # literalExpr
-    | IDENTIFIER                     # identifierExpr
+expression : logicalOrExpr;
+logicalOrExpr: xorExpr ('||' xorExpr)*;
+xorExpr: logicalAndExpr ('#' logicalAndExpr)*;
+logicalAndExpr: comparisonExpr ('&&' comparisonExpr)*;
+comparisonExpr: addExpr (('==' | '!=' | '<' | '>' | '<=' | '>=') addExpr)*;
+addExpr: mulExpr (('+' | '-') mulExpr)*;
+mulExpr: powExpr (('*' | '/') powExpr)*;
+powExpr: unaryExpr ('^' powExpr)?;      // <- prawostronna rekurencja = prawoasocjacyjność!
+unaryExpr: '!' unaryExpr | primary;
+primary
+    : '(' expression ')'
+    | list_access
+    | function_call
+    | literal
+    | IDENTIFIER
     ;
-
 
 literal: INTEGER | FLOAT | STRING | BOOL | literal_list;
 

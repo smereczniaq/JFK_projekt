@@ -1,0 +1,3 @@
+print(999);
+var x = read();
+print(x);

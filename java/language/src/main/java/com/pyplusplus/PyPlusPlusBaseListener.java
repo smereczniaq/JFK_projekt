@@ -161,13 +161,37 @@ public class PyPlusPlusBaseListener implements PyPlusPlusListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterListAccessExpr(PyPlusPlusParser.ListAccessExprContext ctx) { }
+	@Override public void enterExpression(PyPlusPlusParser.ExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitListAccessExpr(PyPlusPlusParser.ListAccessExprContext ctx) { }
+	@Override public void exitExpression(PyPlusPlusParser.ExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterLogicalOrExpr(PyPlusPlusParser.LogicalOrExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLogicalOrExpr(PyPlusPlusParser.LogicalOrExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterXorExpr(PyPlusPlusParser.XorExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitXorExpr(PyPlusPlusParser.XorExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -197,54 +221,6 @@ public class PyPlusPlusBaseListener implements PyPlusPlusListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterParensExpr(PyPlusPlusParser.ParensExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitParensExpr(PyPlusPlusParser.ParensExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterXorExpr(PyPlusPlusParser.XorExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitXorExpr(PyPlusPlusParser.XorExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterLogicalOrExpr(PyPlusPlusParser.LogicalOrExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitLogicalOrExpr(PyPlusPlusParser.LogicalOrExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterNotExpr(PyPlusPlusParser.NotExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitNotExpr(PyPlusPlusParser.NotExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterAddExpr(PyPlusPlusParser.AddExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -252,30 +228,6 @@ public class PyPlusPlusBaseListener implements PyPlusPlusListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitAddExpr(PyPlusPlusParser.AddExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterLiteralExpr(PyPlusPlusParser.LiteralExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitLiteralExpr(PyPlusPlusParser.LiteralExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterFunctionCallExpr(PyPlusPlusParser.FunctionCallExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitFunctionCallExpr(PyPlusPlusParser.FunctionCallExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -305,13 +257,25 @@ public class PyPlusPlusBaseListener implements PyPlusPlusListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterIdentifierExpr(PyPlusPlusParser.IdentifierExprContext ctx) { }
+	@Override public void enterUnaryExpr(PyPlusPlusParser.UnaryExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitIdentifierExpr(PyPlusPlusParser.IdentifierExprContext ctx) { }
+	@Override public void exitUnaryExpr(PyPlusPlusParser.UnaryExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterPrimary(PyPlusPlusParser.PrimaryContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitPrimary(PyPlusPlusParser.PrimaryContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

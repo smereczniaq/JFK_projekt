@@ -1,0 +1,34 @@
+// Testy logicznego XOR (#) — zwraca 1, jeśli tylko jeden operand jest prawdziwy (1)
+
+var a = 0;
+var b = 0;
+var c = 1;
+var d = 1;
+
+// 0 # 0 => 0
+var res1 = a # b;
+print(res1); // oczekiwane: 0
+
+// 0 # 1 => 1
+var res2 = a # c;
+print(res2); // oczekiwane: 1
+
+// 1 # 0 => 1
+var res3 = c # b;
+print(res3); // oczekiwane: 1
+
+// 1 # 1 => 0
+var res4 = c # d;
+print(res4); // oczekiwane: 0
+
+// 0 # 1 # 1 => (0 # 1) # 1 = 1 # 1 = 0
+var res5 = a # c # d;
+print(res5); // oczekiwane: 0
+
+// 1 # 0 # 1 => (1 # 0) # 1 = 1 # 1 = 0
+var res6 = c # b # d;
+print(res6); // oczekiwane: 0
+
+// 1 # 0 # 0 => (1 # 0) # 0 = 1 # 0 = 1
+var res7 = c # b # a;
+print(res7); // oczekiwane: 1

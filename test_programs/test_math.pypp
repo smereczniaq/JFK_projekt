@@ -1,0 +1,48 @@
+// Proste operacje
+var res1 = 2 + 3;
+print(res1); // oczekiwane: 5
+
+var res2 = 10 - 4;
+print(res2); // oczekiwane: 6
+
+var res3 = 3 * 4;
+print(res3); // oczekiwane: 12
+
+var res4 = 12 / 3;
+print(res4); // oczekiwane: 4
+
+var res5 = 2 ^ 3;
+print(res5); // oczekiwane: 8
+
+// Kombinacje bez nawiasów (sprawdzenie priorytetów)
+var res6 = 2 + 3 * 4;
+print(res6); // oczekiwane: 14
+
+var res7 = 10 - 4 / 2;
+print(res7); // oczekiwane: 8
+
+var res8 = 2 + 3 * 4 ^ 2;
+print(res8); // oczekiwane: 50  (3 * (4^2) = 48 + 2 = 50)
+
+var res9 = 2 ^ 3 ^ 2;
+print(res9); // oczekiwane: 512 (2^(3^2) = 2^9 = 512)
+
+// Kombinacje z nawiasami (zmiana priorytetu)
+var res10 = (2 + 3) * 4;
+print(res10); // oczekiwane: 20
+
+var res11 = (10 - 4) / 2;
+print(res11); // oczekiwane: 3
+
+var res12 = (2 + 3) * (4 ^ 2);
+print(res12); // oczekiwane: 80  ((2+3)=5 * 16)
+
+var res13 = (2 ^ 3) ^ 2;
+print(res13); // oczekiwane: 64 ((2^3)=8, 8^2=64)
+
+// Test mieszanych operatorów i wielu nawiasów
+var res14 = ((1 + 2) * (3 + 4)) ^ 2;
+print(res14); // oczekiwane: 441 ((3*7)^2 = 21^2 = 441)
+
+var res15 = 2 + 3 - 1 * 4 / 2;
+print(res15); // oczekiwane: 3 (1 * 4 = 4, 4 / 2 = 2, 2 + 3 - 2 = 3)

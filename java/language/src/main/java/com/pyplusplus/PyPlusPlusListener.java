@@ -129,161 +129,105 @@ public interface PyPlusPlusListener extends ParseTreeListener {
 	 */
 	void exitValue_assignment(PyPlusPlusParser.Value_assignmentContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code listAccessExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
+	 * Enter a parse tree produced by {@link PyPlusPlusParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void enterListAccessExpr(PyPlusPlusParser.ListAccessExprContext ctx);
+	void enterExpression(PyPlusPlusParser.ExpressionContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code listAccessExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
+	 * Exit a parse tree produced by {@link PyPlusPlusParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void exitListAccessExpr(PyPlusPlusParser.ListAccessExprContext ctx);
+	void exitExpression(PyPlusPlusParser.ExpressionContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code logicalAndExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterLogicalAndExpr(PyPlusPlusParser.LogicalAndExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code logicalAndExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitLogicalAndExpr(PyPlusPlusParser.LogicalAndExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code comparisonExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterComparisonExpr(PyPlusPlusParser.ComparisonExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code comparisonExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitComparisonExpr(PyPlusPlusParser.ComparisonExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code parensExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterParensExpr(PyPlusPlusParser.ParensExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code parensExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitParensExpr(PyPlusPlusParser.ParensExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code xorExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterXorExpr(PyPlusPlusParser.XorExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code xorExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitXorExpr(PyPlusPlusParser.XorExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code logicalOrExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
+	 * Enter a parse tree produced by {@link PyPlusPlusParser#logicalOrExpr}.
 	 * @param ctx the parse tree
 	 */
 	void enterLogicalOrExpr(PyPlusPlusParser.LogicalOrExprContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code logicalOrExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
+	 * Exit a parse tree produced by {@link PyPlusPlusParser#logicalOrExpr}.
 	 * @param ctx the parse tree
 	 */
 	void exitLogicalOrExpr(PyPlusPlusParser.LogicalOrExprContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code notExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
+	 * Enter a parse tree produced by {@link PyPlusPlusParser#xorExpr}.
 	 * @param ctx the parse tree
 	 */
-	void enterNotExpr(PyPlusPlusParser.NotExprContext ctx);
+	void enterXorExpr(PyPlusPlusParser.XorExprContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code notExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
+	 * Exit a parse tree produced by {@link PyPlusPlusParser#xorExpr}.
 	 * @param ctx the parse tree
 	 */
-	void exitNotExpr(PyPlusPlusParser.NotExprContext ctx);
+	void exitXorExpr(PyPlusPlusParser.XorExprContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code addExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
+	 * Enter a parse tree produced by {@link PyPlusPlusParser#logicalAndExpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterLogicalAndExpr(PyPlusPlusParser.LogicalAndExprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PyPlusPlusParser#logicalAndExpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitLogicalAndExpr(PyPlusPlusParser.LogicalAndExprContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PyPlusPlusParser#comparisonExpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterComparisonExpr(PyPlusPlusParser.ComparisonExprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PyPlusPlusParser#comparisonExpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitComparisonExpr(PyPlusPlusParser.ComparisonExprContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PyPlusPlusParser#addExpr}.
 	 * @param ctx the parse tree
 	 */
 	void enterAddExpr(PyPlusPlusParser.AddExprContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code addExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
+	 * Exit a parse tree produced by {@link PyPlusPlusParser#addExpr}.
 	 * @param ctx the parse tree
 	 */
 	void exitAddExpr(PyPlusPlusParser.AddExprContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code literalExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterLiteralExpr(PyPlusPlusParser.LiteralExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code literalExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitLiteralExpr(PyPlusPlusParser.LiteralExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code functionCallExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterFunctionCallExpr(PyPlusPlusParser.FunctionCallExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code functionCallExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitFunctionCallExpr(PyPlusPlusParser.FunctionCallExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code mulExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
+	 * Enter a parse tree produced by {@link PyPlusPlusParser#mulExpr}.
 	 * @param ctx the parse tree
 	 */
 	void enterMulExpr(PyPlusPlusParser.MulExprContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code mulExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
+	 * Exit a parse tree produced by {@link PyPlusPlusParser#mulExpr}.
 	 * @param ctx the parse tree
 	 */
 	void exitMulExpr(PyPlusPlusParser.MulExprContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code powExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
+	 * Enter a parse tree produced by {@link PyPlusPlusParser#powExpr}.
 	 * @param ctx the parse tree
 	 */
 	void enterPowExpr(PyPlusPlusParser.PowExprContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code powExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
+	 * Exit a parse tree produced by {@link PyPlusPlusParser#powExpr}.
 	 * @param ctx the parse tree
 	 */
 	void exitPowExpr(PyPlusPlusParser.PowExprContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code identifierExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
+	 * Enter a parse tree produced by {@link PyPlusPlusParser#unaryExpr}.
 	 * @param ctx the parse tree
 	 */
-	void enterIdentifierExpr(PyPlusPlusParser.IdentifierExprContext ctx);
+	void enterUnaryExpr(PyPlusPlusParser.UnaryExprContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code identifierExpr}
-	 * labeled alternative in {@link PyPlusPlusParser#expression}.
+	 * Exit a parse tree produced by {@link PyPlusPlusParser#unaryExpr}.
 	 * @param ctx the parse tree
 	 */
-	void exitIdentifierExpr(PyPlusPlusParser.IdentifierExprContext ctx);
+	void exitUnaryExpr(PyPlusPlusParser.UnaryExprContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PyPlusPlusParser#primary}.
+	 * @param ctx the parse tree
+	 */
+	void enterPrimary(PyPlusPlusParser.PrimaryContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PyPlusPlusParser#primary}.
+	 * @param ctx the parse tree
+	 */
+	void exitPrimary(PyPlusPlusParser.PrimaryContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link PyPlusPlusParser#literal}.
 	 * @param ctx the parse tree

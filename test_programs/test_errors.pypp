@@ -1,0 +1,30 @@
+// ======= BŁĘDY LEKSYKALNE =======
+
+// Niepoprawny znak (np. dolar)
+var $money = 100;  // <-- błąd leksykalny: nielegalny znak '$'
+
+// ======= BŁĘDY SKŁADNIOWE =======
+
+// Brak średnika
+var x = 5           // <-- błąd składniowy: brak średnika
+
+// Nieprawidłowe użycie operatora
+var y = 2 + * 3;    // <-- błąd składniowy: operator '*' bez operandów
+
+// Niedomknięte nawiasy
+var z = (1 + 2;     // <-- błąd składniowy: brak zamykającego nawiasu
+
+// ======= BŁĘDY SEMANTYCZNE =======
+
+// Użycie niezadeklarowanej zmiennej
+print(a);           // <-- błąd semantyczny: a nie została zadeklarowana
+
+// Podwójna deklaracja tej samej zmiennej
+var w = 1;
+var w = 2;          // <-- błąd semantyczny: zmienna 'w' już istnieje
+
+// Przypisanie do niezadeklarowanej zmiennej
+b = 7;              // <-- błąd semantyczny: b nie została zadeklarowana
+
+// Użycie funkcji, która nie istnieje
+foobar();           // <-- błąd semantyczny: nieznana funkcja
