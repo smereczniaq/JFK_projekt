@@ -314,14 +314,4 @@ public interface PyPlusPlusListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitLiteral_list(PyPlusPlusParser.Literal_listContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link PyPlusPlusParser#new_line}.
-	 * @param ctx the parse tree
-	 */
-	void enterNew_line(PyPlusPlusParser.New_lineContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link PyPlusPlusParser#new_line}.
-	 * @param ctx the parse tree
-	 */
-	void exitNew_line(PyPlusPlusParser.New_lineContext ctx);
 }

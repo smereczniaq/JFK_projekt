@@ -348,18 +348,6 @@ public class PyPlusPlusBaseListener implements PyPlusPlusListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitLiteral_list(PyPlusPlusParser.Literal_listContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterNew_line(PyPlusPlusParser.New_lineContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitNew_line(PyPlusPlusParser.New_lineContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
