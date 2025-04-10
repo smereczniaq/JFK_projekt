@@ -4,34 +4,51 @@ public class LLVMGenerator {
     private StringBuilder header = new StringBuilder();
     private StringBuilder main = new StringBuilder();
     private int registerCount = 1;
+    private int globalStringCounter = 0;
 
     public LLVMGenerator() {
         header.append("@format = private unnamed_addr constant [4 x i8] c\"%d\\0A\\00\"\n");
         header.append("@format_double = private unnamed_addr constant [4 x i8] c\"%f\\0A\\00\"\n");
+        header.append("@format_string = private unnamed_addr constant [4 x i8] c\"%s\\0A\\00\"\n");
         header.append("@read_format = private unnamed_addr constant [3 x i8] c\"%d\\00\"\n");
         header.append("@read_format_double = private unnamed_addr constant [4 x i8] c\"%lf\\00\"\n");
         header.append("declare i32 @printf(i8*, ...)\n");
         header.append("declare i32 @scanf(i8*, ...)\n");
         header.append("declare double @llvm.pow.f64(double, double)\n");
     }
-    
-
     public String nextRegister() {
         return "%" + registerCount++;
     }
-
+    
+    public String nextGlobalString(){
+        return "@.str" + globalStringCounter++;
+    }
+    
     public void addMainInstruction(String instruction) {
         main.append("  ").append(instruction).append("\n");
     }
-
+    
     public void declareIntegerVariable(String name) {
         header.append("@").append(name).append(" = global i32 0\n");
     }
-
+    
     public void declareDoubleVariable(String name) {
         header.append("@").append(name).append(" = global double 0.0\n");
-    }    
-
+    }
+    
+    public void declareStringConstant(String name, int size, String content) {
+        header.append(name)  // no extra '@' here because nextGlobalString already adds it
+              .append(" = private unnamed_addr constant [")
+              .append(size)
+              .append(" x i8] c\"")
+              .append(content)
+              .append("\", align 1\n");
+    }
+    
+    public void declareStringPointerVariable(String name) {
+        header.append("@").append(name).append(" = global i8* null\n");
+    }
+    
     public String generate() {
         StringBuilder sb = new StringBuilder();
         sb.append(header);

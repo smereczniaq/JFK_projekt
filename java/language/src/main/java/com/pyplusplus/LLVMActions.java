@@ -14,7 +14,6 @@ public class LLVMActions extends PyPlusPlusBaseListener {
         System.err.println("[DEBUG] " + msg);
     }
 
-
     @Override
     public void exitVariable_instantiation(PyPlusPlusParser.Variable_instantiationContext ctx) {
         String varName = ctx.IDENTIFIER().getText();
@@ -22,16 +21,20 @@ public class LLVMActions extends PyPlusPlusBaseListener {
         if (symbolTable.containsKey(varName)) {
             throw new RuntimeException("Błąd semantyczny: zmienna '" + varName + "' została już zadeklarowana.");
         }
-
+    
         String valueReg = values.get(ctx.expression());
         String type = symbolTable.get(valueReg);
-
+    
         if (ctx.expression() != null) {
             if (valueReg != null) {
                 if ("double".equals(type)) {
                     symbolTable.put(varName, "double");
                     generator.declareDoubleVariable(varName);
                     generator.addMainInstruction("store double " + valueReg + ", double* @" + varName);
+                } else if ("string".equals(type)) {
+                    symbolTable.put(varName, "string");
+                    generator.declareStringPointerVariable(varName);
+                    generator.addMainInstruction("store i8* " + valueReg + ", i8** @" + varName);
                 } else {
                     symbolTable.put(varName, "int");
                     generator.declareIntegerVariable(varName);
@@ -42,6 +45,7 @@ public class LLVMActions extends PyPlusPlusBaseListener {
             }
         }
     }
+    
      
 
     @Override
@@ -548,45 +552,64 @@ public class LLVMActions extends PyPlusPlusBaseListener {
     // public void exitLiteralExpr(PyPlusPlusParser.LiteralExprContext ctx) {
     //     values.put(ctx, values.get(ctx.literal()));
     // }
-
     @Override
     public void exitLiteral(PyPlusPlusParser.LiteralContext ctx) {
         String val = ctx.getText();
         String reg = generator.nextRegister();
-        if (val.contains(".")) {
+    
+        if (val.startsWith("\"") && val.endsWith("\"")) {
+            String strContent = val.substring(1, val.length() - 1);  // Remove quotes
+            String strLabel = generator.nextGlobalString(); // like @.str1, @.str2, etc.
+    
+            int size = strContent.length() + 1; // +1 for \0
+            String llvmStr = strContent.replace("\\n", "\\0A")
+                                       .replace("\\t", "\\09")
+                                       .replace("\"", "\\22") + "\\00";
+    
+            generator.declareStringConstant(strLabel, size, llvmStr);
+            generator.addMainInstruction(reg + " = getelementptr inbounds [" + size + " x i8], [" + size + " x i8]* " + strLabel + ", i32 0, i32 0");
+    
+            values.put(ctx, reg);
+            symbolTable.put(reg, "string");  // more readable name instead of i8*
+        }
+        else if (val.contains(".")) {
             generator.addMainInstruction(reg + " = fadd double 0.0, " + val);
             values.put(ctx, reg);
-            symbolTable.put(reg, "double"); // tymczasowy symbol dla wartości
-        } else {
+            symbolTable.put(reg, "double");
+        } 
+        else {
             generator.addMainInstruction(reg + " = add i32 0, " + val);
             values.put(ctx, reg);
             symbolTable.put(reg, "int");
         }
+    
         values.put(ctx, reg);
-    }    
-
+    }
     @Override
     public void exitPrimary(PyPlusPlusParser.PrimaryContext ctx) {
         if (ctx.IDENTIFIER() != null) {
             String varName = ctx.IDENTIFIER().getText();
-        
+    
             if (!symbolTable.containsKey(varName)) {
                 throw new RuntimeException("Błąd semantyczny: zmienna '" + varName + "' nie została zadeklarowana.");
             }
-        
+    
             String varType = symbolTable.get(varName);
             String reg = generator.nextRegister();
-        
+    
             if ("double".equals(varType)) {
                 generator.addMainInstruction(reg + " = load double, double* @" + varName);
                 symbolTable.put(reg, "double");
+            } else if ("string".equals(varType)) {
+                generator.addMainInstruction(reg + " = load i8*, i8** @" + varName);
+                symbolTable.put(reg, "string");
             } else {
                 generator.addMainInstruction(reg + " = load i32, i32* @" + varName);
                 symbolTable.put(reg, "int");
             }
-        
+    
             values.put(ctx, reg);
-        }        
+        }
     
         else if (ctx.literal() != null) {
             values.put(ctx, values.get(ctx.literal()));
@@ -594,18 +617,23 @@ public class LLVMActions extends PyPlusPlusBaseListener {
     
         else if (ctx.function_call() != null) {
             String functionName = ctx.function_call().IDENTIFIER().getText();
-        
+    
             if (functionName.equals("print")) {
                 if (ctx.function_call().expression(0) != null) {
                     String argValue = values.get(ctx.function_call().expression(0));
                     if (argValue != null) {
                         String type = symbolTable.get(argValue);
                         String dummy = generator.nextRegister();
-
+    
                         if ("double".equals(type)) {
                             generator.addMainInstruction(
                                 dummy + " = call i32 (i8*, ...) @printf(i8* getelementptr inbounds " +
                                 "([4 x i8], [4 x i8]* @format_double, i32 0, i32 0), double " + argValue + ")"
+                            );
+                        } else if ("string".equals(type)) {
+                            generator.addMainInstruction(
+                                dummy + " = call i32 (i8*, ...) @printf(i8* getelementptr inbounds " +
+                                "([4 x i8], [4 x i8]* @format_string, i32 0, i32 0), i8* " + argValue + ")"
                             );
                         } else {
                             generator.addMainInstruction(
@@ -618,12 +646,13 @@ public class LLVMActions extends PyPlusPlusBaseListener {
                     }
                 }
                 values.put(ctx, "0");
-            }        
+            }
+    
             else if (functionName.equals("read")) {
-                String allocaReg = generator.nextRegister();  
-                String dummy = generator.nextRegister();      
-                String loadReg = generator.nextRegister();    
-            
+                String allocaReg = generator.nextRegister();
+                String dummy = generator.nextRegister();
+                String loadReg = generator.nextRegister();
+    
                 generator.addMainInstruction(allocaReg + " = alloca double");
                 generator.addMainInstruction(
                     dummy + " = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds " +
@@ -631,15 +660,14 @@ public class LLVMActions extends PyPlusPlusBaseListener {
                 );
                 generator.addMainInstruction(loadReg + " = load double, double* " + allocaReg);
                 symbolTable.put(loadReg, "double");
-            
+    
                 values.put(ctx, loadReg);
             }
-            
+    
             else {
                 debug("Nieznana funkcja: " + functionName);
             }
         }
-        
     
         else if (ctx.list_access() != null) {
             values.put(ctx, values.get(ctx.list_access()));
@@ -653,7 +681,7 @@ public class LLVMActions extends PyPlusPlusBaseListener {
             debug("Nieznany przypadek w primary: " + ctx.getText());
         }
     }
-
+        
 
     @Override
     public void exitReturn_statement(PyPlusPlusParser.Return_statementContext ctx) {
