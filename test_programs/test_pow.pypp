@@ -1,25 +1,35 @@
-// Testy operatora potęgowania (^)
+// Potęgowanie — int ^ int
+var a = 2 ^ 3;
+print(a); // spodziewane: 8
 
-var res1 = 2 ^ 3;
-print(res1); // oczekiwane: 8
+// double ^ double
+var b = 2.0 ^ 3.0;
+print(b); // spodziewane: 8.0
 
-var res2 = 3 ^ 2;
-print(res2); // oczekiwane: 9
+// int ^ double
+var c = 2 ^ 3.5;
+print(c); // spodziewane: 11.313708... (czyli 2^3.5)
 
-var res3 = 5 ^ 0;
-print(res3); // oczekiwane: 1
+// double ^ int
+var d = 2.5 ^ 2;
+print(d); // spodziewane: 6.25
 
-var res4 = 1 ^ 100;
-print(res4); // oczekiwane: 1
+// zero ^ cokolwiek
+var e = 0 ^ 5;
+print(e); // spodziewane: 0
 
-var res5 = 0 ^ 3;
-print(res5); // oczekiwane: 0
+// cokolwiek ^ zero
+var f = 5.5 ^ 0;
+print(f); // spodziewane: 1.0
 
-var res6 = 2 ^ 3 ^ 2;
-print(res6); // oczekiwane: 512 (bo 2 ^ (3 ^ 2))
+// 1 ^ x
+var g = 1 ^ 100;
+print(g); // spodziewane: 1
 
-var res7 = 2 ^ (3 ^ 2);
-print(res7); // oczekiwane: 512
+// Zagnieżdżone potęgowanie
+var h = 2 ^ 3 ^ 2;
+print(h); // spodziewane: 512 (bo 3^2 = 9, a 2^9 = 512)
 
-var res8 = (2 ^ 3) ^ 2;
-print(res8); // oczekiwane: 64
+// double zagnieżdżone
+var i = 2.0 ^ (1.0 ^ 2.0);
+print(i); // spodziewane: 2.0 (bo 1^2 = 1, 2^1 = 2)

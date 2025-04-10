@@ -2,6 +2,7 @@ package com.pyplusplus;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
 public class LLVMActions extends PyPlusPlusBaseListener {
@@ -9,11 +10,10 @@ public class LLVMActions extends PyPlusPlusBaseListener {
     private final ParseTreeProperty<String> values = new ParseTreeProperty<>();
     Map<String, String> symbolTable = new HashMap<>();
 
-    
-
     private void debug(String msg) {
         System.err.println("[DEBUG] " + msg);
     }
+
 
     @Override
     public void exitVariable_instantiation(PyPlusPlusParser.Variable_instantiationContext ctx) {
@@ -22,15 +22,21 @@ public class LLVMActions extends PyPlusPlusBaseListener {
         if (symbolTable.containsKey(varName)) {
             throw new RuntimeException("Błąd semantyczny: zmienna '" + varName + "' została już zadeklarowana.");
         }
-    
-        symbolTable.put(varName, "int"); // uproszczenie: wszystkie zmienne typu int
-        generator.declareVariable(varName);
-        System.out.println(ctx.expression());
+
+        String valueReg = values.get(ctx.expression());
+        String type = symbolTable.get(valueReg);
+
         if (ctx.expression() != null) {
-            String valueReg = values.get(ctx.expression());
-    
             if (valueReg != null) {
-                generator.addMainInstruction("store i32 " + valueReg + ", i32* @" + varName);
+                if ("double".equals(type)) {
+                    symbolTable.put(varName, "double");
+                    generator.declareDoubleVariable(varName);
+                    generator.addMainInstruction("store double " + valueReg + ", double* @" + varName);
+                } else {
+                    symbolTable.put(varName, "int");
+                    generator.declareIntegerVariable(varName);
+                    generator.addMainInstruction("store i32 " + valueReg + ", i32* @" + varName);
+                }
             } else {
                 debug("Brak wartości dla przypisania w 'var " + varName + "'");
             }
@@ -70,7 +76,6 @@ public class LLVMActions extends PyPlusPlusBaseListener {
         }
     
         String result = values.get(ctx.xorExpr(0));
-    
         for (int i = 1; i < count; i++) {
             String right = values.get(ctx.xorExpr(i));
     
@@ -79,24 +84,40 @@ public class LLVMActions extends PyPlusPlusBaseListener {
                 return;
             }
     
-            // Konwersja operandów do i1
+            // Sprawdź typy
+            String leftType = symbolTable.get(result);
+            String rightType = symbolTable.get(right);
+    
+            boolean leftIsDouble = "double".equals(leftType);
+            boolean rightIsDouble = "double".equals(rightType);
+    
             String leftCond = generator.nextRegister();
-            generator.addMainInstruction(leftCond + " = icmp ne i32 " + result + ", 0");
+            if (leftIsDouble) {
+                generator.addMainInstruction(leftCond + " = fcmp une double " + result + ", 0.0");
+            } else {
+                generator.addMainInstruction(leftCond + " = icmp ne i32 " + result + ", 0");
+            }
     
             String rightCond = generator.nextRegister();
-            generator.addMainInstruction(rightCond + " = icmp ne i32 " + right + ", 0");
+            if (rightIsDouble) {
+                generator.addMainInstruction(rightCond + " = fcmp une double " + right + ", 0.0");
+            } else {
+                generator.addMainInstruction(rightCond + " = icmp ne i32 " + right + ", 0");
+            }
     
-            // OR logiczne
+            // or i1
             String orResult = generator.nextRegister();
             generator.addMainInstruction(orResult + " = or i1 " + leftCond + ", " + rightCond);
     
-            // Rozszerzenie do i32
+            // Rozszerz do i32
             result = generator.nextRegister();
             generator.addMainInstruction(result + " = zext i1 " + orResult + " to i32");
+    
+            symbolTable.put(result, "int");
         }
     
         values.put(ctx, result);
-    }
+    }    
     
 
     @Override
@@ -118,12 +139,26 @@ public class LLVMActions extends PyPlusPlusBaseListener {
                 return;
             }
     
-            // Konwersja operandów do i1
+            String leftType = symbolTable.get(result);
+            String rightType = symbolTable.get(right);
+    
+            boolean leftIsDouble = "double".equals(leftType);
+            boolean rightIsDouble = "double".equals(rightType);
+    
+            // Konwersja operandów do boola
             String leftCond = generator.nextRegister();
-            generator.addMainInstruction(leftCond + " = icmp ne i32 " + result + ", 0");
+            if (leftIsDouble) {
+                generator.addMainInstruction(leftCond + " = fcmp une double " + result + ", 0.0");
+            } else {
+                generator.addMainInstruction(leftCond + " = icmp ne i32 " + result + ", 0");
+            }
     
             String rightCond = generator.nextRegister();
-            generator.addMainInstruction(rightCond + " = icmp ne i32 " + right + ", 0");
+            if (rightIsDouble) {
+                generator.addMainInstruction(rightCond + " = fcmp une double " + right + ", 0.0");
+            } else {
+                generator.addMainInstruction(rightCond + " = icmp ne i32 " + right + ", 0");
+            }
     
             // XOR logiczne
             String xorResult = generator.nextRegister();
@@ -132,10 +167,12 @@ public class LLVMActions extends PyPlusPlusBaseListener {
             // Rozszerzenie do i32 — gotowe na kolejną iterację lub końcowy wynik
             result = generator.nextRegister();
             generator.addMainInstruction(result + " = zext i1 " + xorResult + " to i32");
+    
+            symbolTable.put(result, "int");
         }
     
         values.put(ctx, result);
-    }
+    }    
     
 
     @Override
@@ -157,12 +194,26 @@ public class LLVMActions extends PyPlusPlusBaseListener {
                 return;
             }
     
-            // Konwersja operandów do i1
+            String leftType = symbolTable.get(result);
+            String rightType = symbolTable.get(right);
+    
+            boolean leftIsDouble = "double".equals(leftType);
+            boolean rightIsDouble = "double".equals(rightType);
+    
+            // Porównanie operandów do zera (czy są "true")
             String leftCond = generator.nextRegister();
-            generator.addMainInstruction(leftCond + " = icmp ne i32 " + result + ", 0");
+            if (leftIsDouble) {
+                generator.addMainInstruction(leftCond + " = fcmp une double " + result + ", 0.0");
+            } else {
+                generator.addMainInstruction(leftCond + " = icmp ne i32 " + result + ", 0");
+            }
     
             String rightCond = generator.nextRegister();
-            generator.addMainInstruction(rightCond + " = icmp ne i32 " + right + ", 0");
+            if (rightIsDouble) {
+                generator.addMainInstruction(rightCond + " = fcmp une double " + right + ", 0.0");
+            } else {
+                generator.addMainInstruction(rightCond + " = icmp ne i32 " + right + ", 0");
+            }
     
             // AND logiczne
             String andResult = generator.nextRegister();
@@ -171,16 +222,18 @@ public class LLVMActions extends PyPlusPlusBaseListener {
             // Rozszerzenie do i32 — gotowe na kolejną iterację lub użycie końcowe
             result = generator.nextRegister();
             generator.addMainInstruction(result + " = zext i1 " + andResult + " to i32");
+    
+            symbolTable.put(result, "int");
         }
     
         values.put(ctx, result);
-    }
+    }    
     
 
     @Override
     public void exitComparisonExpr(PyPlusPlusParser.ComparisonExprContext ctx) {
         int count = ctx.addExpr().size();
-
+    
         if (count == 1) {
             values.put(ctx, values.get(ctx.addExpr(0)));
             return;
@@ -192,29 +245,60 @@ public class LLVMActions extends PyPlusPlusBaseListener {
     
         String left = values.get(ctx.addExpr(0));
         String right = values.get(ctx.addExpr(1));
-        String operator = ctx.getChild(1).getText(); // operator między operandami
-        String llvmOp;
+        String operator = ctx.getChild(1).getText(); // np. ==, !=, <, <=, >, >=
     
-        switch(operator) {
-            case "==": llvmOp = "eq"; break;
-            case "!=": llvmOp = "ne"; break;
-            case "<":  llvmOp = "slt"; break;
-            case "<=": llvmOp = "sle"; break;
-            case ">":  llvmOp = "sgt"; break;
-            case ">=": llvmOp = "sge"; break;
+        if (left == null || right == null) {
+            debug("Brakuje operandów w comparisonExpr");
+            return;
+        }
+    
+        String leftType = symbolTable.get(left);
+        String rightType = symbolTable.get(right);
+        boolean isDouble = "double".equals(leftType) || "double".equals(rightType);
+    
+        // Rzutowanie int → double
+        if ("int".equals(leftType) && isDouble) {
+            String casted = generator.nextRegister();
+            generator.addMainInstruction(casted + " = sitofp i32 " + left + " to double");
+            left = casted;
+            symbolTable.put(left, "double");
+        }
+    
+        if ("int".equals(rightType) && isDouble) {
+            String casted = generator.nextRegister();
+            generator.addMainInstruction(casted + " = sitofp i32 " + right + " to double");
+            right = casted;
+            symbolTable.put(right, "double");
+        }
+    
+        // LLVM operator i typ
+        String llvmOp;
+        String cmpInstr = isDouble ? "fcmp" : "icmp";
+        String type = isDouble ? "double" : "i32";
+    
+        switch (operator) {
+            case "==": llvmOp = isDouble ? "oeq" : "eq"; break;
+            case "!=": llvmOp = isDouble ? "one" : "ne"; break;
+            case "<":  llvmOp = isDouble ? "olt" : "slt"; break;
+            case "<=": llvmOp = isDouble ? "ole" : "sle"; break;
+            case ">":  llvmOp = isDouble ? "ogt" : "sgt"; break;
+            case ">=": llvmOp = isDouble ? "oge" : "sge"; break;
             default:
                 debug("Nieznany operator porównania: " + operator);
                 return;
         }
     
+        // Generowanie porównania
         String result = generator.nextRegister();
-        generator.addMainInstruction(result + " = icmp " + llvmOp + " i32 " + left + ", " + right);
+        generator.addMainInstruction(result + " = " + cmpInstr + " " + llvmOp + " " + type + " " + left + ", " + right);
     
+        // Rozszerzenie do i32
         String extended = generator.nextRegister();
         generator.addMainInstruction(extended + " = zext i1 " + result + " to i32");
     
         values.put(ctx, extended);
-    }
+        symbolTable.put(extended, "int"); // wynik porównania to zawsze int (bool jako 0/1)
+    }    
     
 
     @Override
@@ -222,15 +306,18 @@ public class LLVMActions extends PyPlusPlusBaseListener {
         int count = ctx.mulExpr().size();
     
         if (count == 1) {
-            values.put(ctx, values.get(ctx.mulExpr(0)));
+            String val = values.get(ctx.mulExpr(0));
+            values.put(ctx, val);
             return;
         }
     
-        String result = values.get(ctx.mulExpr(0));
-        if (result == null) {
+        String left = values.get(ctx.mulExpr(0));
+        if (left == null) {
             debug("Brakuje lewego operandu w addExpr");
             return;
         }
+    
+        String result = left;
     
         for (int i = 1; i < count; i++) {
             String right = values.get(ctx.mulExpr(i));
@@ -241,78 +328,165 @@ public class LLVMActions extends PyPlusPlusBaseListener {
                 return;
             }
     
+            // Ustal typy operandów
+            String leftType = symbolTable.get(result);
+            String rightType = symbolTable.get(right);
+            boolean isDouble = "double".equals(leftType) || "double".equals(rightType);
+    
+            // Rzutowanie int → double
+            if ("int".equals(leftType) && isDouble) {
+                String casted = generator.nextRegister();
+                generator.addMainInstruction(casted + " = sitofp i32 " + result + " to double");
+                result = casted;
+                symbolTable.put(result, "double");
+            }
+    
+            if ("int".equals(rightType) && isDouble) {
+                String casted = generator.nextRegister();
+                generator.addMainInstruction(casted + " = sitofp i32 " + right + " to double");
+                right = casted;
+                symbolTable.put(right, "double");
+            }
+    
             String temp = generator.nextRegister();
     
-            if (operator.equals("+")) {
-                generator.addMainInstruction(temp + " = add i32 " + result + ", " + right);
-            } else if (operator.equals("-")) {
-                generator.addMainInstruction(temp + " = sub i32 " + result + ", " + right);
-            } else {
-                debug("Nieznany operator w addExpr: " + operator);
-                return;
+            switch (operator) {
+                case "+" -> generator.addMainInstruction(temp + " = " + (isDouble ? "fadd double " : "add i32 ") + result + ", " + right);
+                case "-" -> generator.addMainInstruction(temp + " = " + (isDouble ? "fsub double " : "sub i32 ") + result + ", " + right);
+                default -> {
+                    debug("Nieznany operator w addExpr: " + operator);
+                    return;
+                }
             }
     
             result = temp;
+            symbolTable.put(result, isDouble ? "double" : "int");
         }
     
         values.put(ctx, result);
     }
+    
     
 
     @Override
     public void exitMulExpr(PyPlusPlusParser.MulExprContext ctx) {
-        if (ctx.powExpr().size() == 1) {
-            values.put(ctx, values.get(ctx.powExpr(0)));
+        int count = ctx.powExpr().size();
+    
+        if (count == 1) {
+            String val = values.get(ctx.powExpr(0));
+            values.put(ctx, val);
             return;
         }
     
-        String result = values.get(ctx.powExpr(0));
+        String left = values.get(ctx.powExpr(0));
+        if (left == null) {
+            debug("Brakuje lewego operandu w mulExpr");
+            return;
+        }
     
-        for (int i = 1; i < ctx.powExpr().size(); i++) {
+        String result = left;
+    
+        for (int i = 1; i < count; i++) {
             String right = values.get(ctx.powExpr(i));
-            String operator = ctx.getChild(2 * i - 1).getText(); // operator jest między operandami
+            String operator = ctx.getChild(2 * i - 1).getText(); // '*' lub '/'
+    
+            if (right == null) {
+                debug("Brakuje prawego operandu w mulExpr");
+                return;
+            }
+    
+            // Typy operandów
+            String leftType = symbolTable.get(result);
+            String rightType = symbolTable.get(right);
+            boolean isDouble = "double".equals(leftType) || "double".equals(rightType);
+    
+            // Rzutowanie int → double
+            if ("int".equals(leftType) && isDouble) {
+                String casted = generator.nextRegister();
+                generator.addMainInstruction(casted + " = sitofp i32 " + result + " to double");
+                result = casted;
+                symbolTable.put(result, "double");
+            }
+    
+            if ("int".equals(rightType) && isDouble) {
+                String casted = generator.nextRegister();
+                generator.addMainInstruction(casted + " = sitofp i32 " + right + " to double");
+                right = casted;
+                symbolTable.put(right, "double");
+            }
     
             String temp = generator.nextRegister();
     
-            if (operator.equals("*")) {
-                generator.addMainInstruction(temp + " = mul i32 " + result + ", " + right);
-            } else if (operator.equals("/")) {
-                generator.addMainInstruction(temp + " = sdiv i32 " + result + ", " + right);
+            switch (operator) {
+                case "*" -> generator.addMainInstruction(temp + " = " + (isDouble ? "fmul double " : "mul i32 ") + result + ", " + right);
+                case "/" -> generator.addMainInstruction(temp + " = " + (isDouble ? "fdiv double " : "sdiv i32 ") + result + ", " + right);
+                default -> {
+                    debug("Nieznany operator w mulExpr: " + operator);
+                    return;
+                }
             }
     
             result = temp;
+            symbolTable.put(result, isDouble ? "double" : "int");
         }
     
         values.put(ctx, result);
-    }
+    }    
     
 
     @Override
     public void exitPowExpr(PyPlusPlusParser.PowExprContext ctx) {
         String base = values.get(ctx.unaryExpr());
+        if (base == null) {
+            debug("Brakuje podstawy w powExpr");
+            return;
+        }
+    
         if (ctx.powExpr() == null) {
             // tylko jedna wartość — przekazujemy w górę bez operacji
             values.put(ctx, base);
             return;
         }
-
-        String exp = ctx.powExpr() != null ? values.get(ctx.powExpr()) : null;
     
-        if (base == null || (ctx.powExpr() != null && exp == null)) {
-            debug("Brakuje operandów dla potęgowania");
+        String exp = values.get(ctx.powExpr());
+        if (exp == null) {
+            debug("Brakuje wykładnika w powExpr");
             return;
         }
     
-        String result;
-        if (exp != null) {
-            result = generator.nextRegister();
-            generator.addMainInstruction(result + " = call i32 @powi(i32 " + base + ", i32 " + exp + ")");
+        // Ustal typy
+        String baseType = symbolTable.get(base);
+        String expType = symbolTable.get(exp);
+        boolean isDouble = "double".equals(baseType) || "double".equals(expType);
+    
+        // Rzutowanie int → double
+        if ("int".equals(baseType) && isDouble) {
+            String casted = generator.nextRegister();
+            generator.addMainInstruction(casted + " = sitofp i32 " + base + " to double");
+            base = casted;
+            symbolTable.put(base, "double");
+        }
+    
+        if ("int".equals(expType) && isDouble) {
+            String casted = generator.nextRegister();
+            generator.addMainInstruction(casted + " = sitofp i32 " + exp + " to double");
+            exp = casted;
+            symbolTable.put(exp, "double");
+        }
+    
+        String result = generator.nextRegister();
+    
+        if (isDouble) {
+            generator.addMainInstruction(result + " = call double @llvm.pow.f64(double " + base + ", double " + exp + ")");
+            symbolTable.put(result, "double");
         } else {
-            result = base; // bez potęgowania, tylko pojedynczy operand
+            generator.addMainInstruction(result + " = call i32 @powi(i32 " + base + ", i32 " + exp + ")");
+            symbolTable.put(result, "int");
         }
     
         values.put(ctx, result);
     }
+    
 
     @Override
     public void exitUnaryExpr(PyPlusPlusParser.UnaryExprContext ctx) {
@@ -329,9 +503,16 @@ public class LLVMActions extends PyPlusPlusBaseListener {
                 return;
             }
     
+            String operandType = symbolTable.get(operand);
+            boolean isDouble = "double".equals(operandType);
+    
             // Konwersja do boola
             String condition = generator.nextRegister();
-            generator.addMainInstruction(condition + " = icmp ne i32 " + operand + ", 0");
+            if (isDouble) {
+                generator.addMainInstruction(condition + " = fcmp une double " + operand + ", 0.0");
+            } else {
+                generator.addMainInstruction(condition + " = icmp ne i32 " + operand + ", 0");
+            }
     
             // Negacja logiczna (odwrócenie wartości boola)
             String notResult = generator.nextRegister();
@@ -342,13 +523,18 @@ public class LLVMActions extends PyPlusPlusBaseListener {
             generator.addMainInstruction(finalResult + " = zext i1 " + notResult + " to i32");
     
             values.put(ctx, finalResult);
-        } else if (ctx.primary() != null) {
+            symbolTable.put(finalResult, "int"); // wynik negacji to int (0/1)
+        }
+    
+        else if (ctx.primary() != null) {
             String val = values.get(ctx.primary());
             values.put(ctx, val);
-        } else {
+        }
+    
+        else {
             debug("Nieznana forma unaryExpr: " + ctx.getText());
         }
-    }
+    }    
     
     
     // @Override
@@ -367,7 +553,15 @@ public class LLVMActions extends PyPlusPlusBaseListener {
     public void exitLiteral(PyPlusPlusParser.LiteralContext ctx) {
         String val = ctx.getText();
         String reg = generator.nextRegister();
-        generator.addMainInstruction(reg + " = add i32 0, " + val);
+        if (val.contains(".")) {
+            generator.addMainInstruction(reg + " = fadd double 0.0, " + val);
+            values.put(ctx, reg);
+            symbolTable.put(reg, "double"); // tymczasowy symbol dla wartości
+        } else {
+            generator.addMainInstruction(reg + " = add i32 0, " + val);
+            values.put(ctx, reg);
+            symbolTable.put(reg, "int");
+        }
         values.put(ctx, reg);
     }    
 
@@ -375,15 +569,24 @@ public class LLVMActions extends PyPlusPlusBaseListener {
     public void exitPrimary(PyPlusPlusParser.PrimaryContext ctx) {
         if (ctx.IDENTIFIER() != null) {
             String varName = ctx.IDENTIFIER().getText();
-    
+        
             if (!symbolTable.containsKey(varName)) {
                 throw new RuntimeException("Błąd semantyczny: zmienna '" + varName + "' nie została zadeklarowana.");
             }
-    
+        
+            String varType = symbolTable.get(varName);
             String reg = generator.nextRegister();
-            generator.addMainInstruction(reg + " = load i32, i32* @" + varName);
+        
+            if ("double".equals(varType)) {
+                generator.addMainInstruction(reg + " = load double, double* @" + varName);
+                symbolTable.put(reg, "double");
+            } else {
+                generator.addMainInstruction(reg + " = load i32, i32* @" + varName);
+                symbolTable.put(reg, "int");
+            }
+        
             values.put(ctx, reg);
-        }
+        }        
     
         else if (ctx.literal() != null) {
             values.put(ctx, values.get(ctx.literal()));
@@ -396,37 +599,42 @@ public class LLVMActions extends PyPlusPlusBaseListener {
                 if (ctx.function_call().expression(0) != null) {
                     String argValue = values.get(ctx.function_call().expression(0));
                     if (argValue != null) {
-                        String dummy = generator.nextRegister(); // zabezpieczenie rejestru
-                        generator.addMainInstruction(
-                            dummy + " = call i32 (i8*, ...) @printf(i8* getelementptr inbounds " +
-                            "([4 x i8], [4 x i8]* @format, i32 0, i32 0), i32 " + argValue + ")"
-                        );
+                        String type = symbolTable.get(argValue);
+                        String dummy = generator.nextRegister();
+
+                        if ("double".equals(type)) {
+                            generator.addMainInstruction(
+                                dummy + " = call i32 (i8*, ...) @printf(i8* getelementptr inbounds " +
+                                "([4 x i8], [4 x i8]* @format_double, i32 0, i32 0), double " + argValue + ")"
+                            );
+                        } else {
+                            generator.addMainInstruction(
+                                dummy + " = call i32 (i8*, ...) @printf(i8* getelementptr inbounds " +
+                                "([4 x i8], [4 x i8]* @format, i32 0, i32 0), i32 " + argValue + ")"
+                            );
+                        }
                     } else {
                         debug("Brak wartości do wypisania w print()");
                     }
                 }
                 values.put(ctx, "0");
-            }
-        
+            }        
             else if (functionName.equals("read")) {
-                // rejestr na wskaźnik alloca
-                String allocaReg = generator.nextRegister();
-                generator.addMainInstruction(allocaReg + " = alloca i32");
-        
-                // przypisz wywołanie scanf do dummy żeby zarejestrować użycie
-                String dummy = generator.nextRegister();
+                String allocaReg = generator.nextRegister();  
+                String dummy = generator.nextRegister();      
+                String loadReg = generator.nextRegister();    
+            
+                generator.addMainInstruction(allocaReg + " = alloca double");
                 generator.addMainInstruction(
                     dummy + " = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds " +
-                    "([3 x i8], [3 x i8]* @read_format, i32 0, i32 0), i32* " + allocaReg + ")"
+                    "([4 x i8], [4 x i8]* @read_format_double, i32 0, i32 0), double* " + allocaReg + ")"
                 );
-        
-                // załaduj wartość wczytaną z pamięci
-                String loadReg = generator.nextRegister();
-                generator.addMainInstruction(loadReg + " = load i32, i32* " + allocaReg);
-        
+                generator.addMainInstruction(loadReg + " = load double, double* " + allocaReg);
+                symbolTable.put(loadReg, "double");
+            
                 values.put(ctx, loadReg);
             }
-        
+            
             else {
                 debug("Nieznana funkcja: " + functionName);
             }
@@ -445,16 +653,21 @@ public class LLVMActions extends PyPlusPlusBaseListener {
             debug("Nieznany przypadek w primary: " + ctx.getText());
         }
     }
-    
-    
+
 
     @Override
     public void exitReturn_statement(PyPlusPlusParser.Return_statementContext ctx) {
         if (ctx.expression() != null) {
             String val = values.get(ctx.expression());
-            System.out.println(val);
             if (val != null) {
-                generator.addMainInstruction("ret i32 " + val);
+                String type = symbolTable.get(val);
+                if ("double".equals(type)) {
+                    String casted = generator.nextRegister();
+                    generator.addMainInstruction(casted + " = fptosi double " + val + " to i32");
+                    generator.addMainInstruction("ret i32 " + casted);
+                } else {
+                    generator.addMainInstruction("ret i32 " + val);
+                }
             } else {
                 debug("Brak wartości w return");
                 generator.addMainInstruction("ret i32 0");

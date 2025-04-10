@@ -54,7 +54,7 @@ primary
 
 literal: INTEGER | FLOAT | STRING | BOOL | literal_list;
 
-type: 'int' | 'float' | 'Float32' | 'Float64' | 'string' | 'bool' | 'list';
+type: 'int' | 'double' | 'float' | 'Float32' | 'Float64' | 'string' | 'bool' | 'list';
 
 literal_list: '[' expression (',' expression)* ']';
 

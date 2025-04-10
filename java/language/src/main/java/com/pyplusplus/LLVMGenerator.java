@@ -7,9 +7,12 @@ public class LLVMGenerator {
 
     public LLVMGenerator() {
         header.append("@format = private unnamed_addr constant [4 x i8] c\"%d\\0A\\00\"\n");
-        header.append("@read_format = private unnamed_addr constant [3 x i8] c\"%d\\00\"\n"); // <-- dodaj to
+        header.append("@format_double = private unnamed_addr constant [4 x i8] c\"%f\\0A\\00\"\n");
+        header.append("@read_format = private unnamed_addr constant [3 x i8] c\"%d\\00\"\n");
+        header.append("@read_format_double = private unnamed_addr constant [4 x i8] c\"%lf\\00\"\n");
         header.append("declare i32 @printf(i8*, ...)\n");
-        header.append("declare i32 @scanf(i8*, ...)\n"); // <-- dodaj to
+        header.append("declare i32 @scanf(i8*, ...)\n");
+        header.append("declare double @llvm.pow.f64(double, double)\n");
     }
     
 
@@ -21,9 +24,13 @@ public class LLVMGenerator {
         main.append("  ").append(instruction).append("\n");
     }
 
-    public void declareVariable(String name) {
+    public void declareIntegerVariable(String name) {
         header.append("@").append(name).append(" = global i32 0\n");
     }
+
+    public void declareDoubleVariable(String name) {
+        header.append("@").append(name).append(" = global double 0.0\n");
+    }    
 
     public String generate() {
         StringBuilder sb = new StringBuilder();

@@ -1,36 +1,29 @@
-// Testy logicznego AND (&&) — zwraca 1, jeśli oba operandy są prawdziwe (≠ 0)
+// Test logicznego AND (&&) z typami int i double
 
-var t = 1;
-var f = 0;
+// int && int
+var a = 1 && 1;
+print(a); // spodziewane: 1
 
-// 1 && 1 => 1
-var res1 = t && t;
-print(res1); // oczekiwane: 1
+// double && double
+var b = 2.5 && 3.5;
+print(b); // spodziewane: 1
 
-// 1 && 0 => 0
-var res2 = t && f;
-print(res2); // oczekiwane: 0
+// int && double
+var c = 0 && 3.5;
+print(c); // spodziewane: 0
 
-// 0 && 1 => 0
-var res3 = f && t;
-print(res3); // oczekiwane: 0
+// double && int
+var d = 0.0 && 1;
+print(d); // spodziewane: 0
 
-// 0 && 0 => 0
-var res4 = f && f;
-print(res4); // oczekiwane: 0
+// zero && zero
+var e = 0.0 && 0;
+print(e); // spodziewane: 0
 
-// 1 && 1 && 1 => 1
-var res5 = t && t && t;
-print(res5); // oczekiwane: 1
+// true && false
+var f = 1.0 && 0.0;
+print(f); // spodziewane: 0
 
-// 1 && 1 && 0 => 0
-var res6 = t && t && f;
-print(res6); // oczekiwane: 0
-
-// 0 && 1 && 1 => 0
-var res7 = f && t && t;
-print(res7); // oczekiwane: 0
-
-// zagnieżdżone z wyrażeniem
-var res8 = (1 + 1) && (3 - 3);
-print(res8); // oczekiwane: 0
+// zagnieżdżone AND z mixem typów
+var g = 1 && 2.0 && 3 && 4.4;
+print(g); // spodziewane: 1

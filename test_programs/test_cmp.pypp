@@ -1,52 +1,60 @@
-// Testy operatorów porównania
+// Porównania int vs int
+var a = 5 == 5;
+print(a); // spodziewane: 1
 
-var a = 5;
-var b = 10;
+var b = 3 != 3;
+print(b); // spodziewane: 0
 
-// Równość
-var res1 = a == a;
-print(res1); // oczekiwane: 1
+var c = 2 < 5;
+print(c); // spodziewane: 1
 
-var res2 = a == b;
-print(res2); // oczekiwane: 0
+var d = 4 <= 4;
+print(d); // spodziewane: 1
 
-// Nierówność
-var res3 = a != b;
-print(res3); // oczekiwane: 1
+var e = 7 > 6;
+print(e); // spodziewane: 1
 
-var res4 = a != a;
-print(res4); // oczekiwane: 0
+var f = 9 >= 10;
+print(f); // spodziewane: 0
 
-// Mniejsze
-var res5 = a < b;
-print(res5); // oczekiwane: 1
+// Porównania double vs double
+var g = 3.14 == 3.14;
+print(g); // spodziewane: 1
 
-var res6 = b < a;
-print(res6); // oczekiwane: 0
+var h = 1.1 != 2.2;
+print(h); // spodziewane: 1
 
-// Mniejsze lub równe
-var res7 = a <= b;
-print(res7); // oczekiwane: 1
+var i = 2.5 < 5.0;
+print(i); // spodziewane: 1
 
-var res8 = b <= b;
-print(res8); // oczekiwane: 1
+var j = 4.5 <= 4.4;
+print(j); // spodziewane: 0
 
-var res9 = b <= a;
-print(res9); // oczekiwane: 0
+var k = 7.7 > 6.6;
+print(k); // spodziewane: 1
 
-// Większe
-var res10 = b > a;
-print(res10); // oczekiwane: 1
+var l = 9.0 >= 9.1;
+print(l); // spodziewane: 0
 
-var res11 = a > b;
-print(res11); // oczekiwane: 0
+// Porównania int vs double
+var m = 5 == 5.0;
+print(m); // spodziewane: 1
 
-// Większe lub równe
-var res12 = b >= a;
-print(res12); // oczekiwane: 1
+var n = 5 != 5.1;
+print(n); // spodziewane: 1
 
-var res13 = a >= b;
-print(res13); // oczekiwane: 0
+var o = 4 < 4.5;
+print(o); // spodziewane: 1
 
-var res14 = a >= a;
-print(res14); // oczekiwane: 1
+var p = 6 <= 5.9;
+print(p); // spodziewane: 0
+
+// Porównania double vs int
+var q = 3.0 == 3;
+print(q); // spodziewane: 1
+
+var r = 2.1 > 2;
+print(r); // spodziewane: 1
+
+var s = 1.0 >= 2;
+print(s); // spodziewane: 0

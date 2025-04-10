@@ -1,43 +1,52 @@
-var a = 3;
-var b = 5;
-var c = 8;
+// Operator negacji (!)
+var a = !0;
+print(a); // spodziewane: 1
 
-// 3 + 2 == 5 → true (1)
-var res1 = (a + 2) == b;
-print(res1); // 1
+var b = !1;
+print(b); // spodziewane: 0
 
-// 3 * 2 < 8 → true (1)
-var res2 = (a * 2) < c;
-print(res2); // 1
+var c = !0.0;
+print(c); // spodziewane: 1
 
-// (3 * 3 == 9) && (5 < 8) → true && true → true (1)
-var res3 = (a * a == 9) && (b < c);
-print(res3); // 1
+var d = !3.14;
+print(d); // spodziewane: 0
 
-// (3 + 5 > 10) || (8 - 3 == 5) → false || true → true (1)
-var res4 = (a + b > 10) || (c - a == 5);
-print(res4); // 1
+// Operator && z typami mieszanymi
+var e = 1 && 2.5;
+print(e); // spodziewane: 1
 
-// !(5 == 5) → false → 0
-var res5 = !(b == 5);
-print(res5); // 0
+var f = 0 && 5.0;
+print(f); // spodziewane: 0
 
-// !(3 != 3) → !(false) → true → 1
-var res6 = !(a != 3);
-print(res6); // 1
+var g = 3.3 && 0;
+print(g); // spodziewane: 0
 
-// !(3 + 2 < 5) → !(false) → 1
-var res7 = !((a + 2) < 5);
-print(res7); // 1
+// Operator || z typami mieszanymi
+var h = 0 || 2.5;
+print(h); // spodziewane: 1
 
-// 3 == 3 && !(8 < 5) → true && true → 1
-var res8 = (a == 3) && !(c < b);
-print(res8); // 1
+var i = 0.0 || 0;
+print(i); // spodziewane: 0
 
-// ((3 + 2) == 5) && ((5 + 3) != 9) → true && true → 1
-var res9 = ((a + 2) == 5) && ((b + a) != 9);
-print(res9); // 1
+var j = 1.0 || 0;
+print(j); // spodziewane: 1
 
-// ((3 ^ 2) == 9) || (5 * 2 > 10) → true || false → 1
-var res10 = ((a ^ 2) == 9) || ((b * 2) > 10);
-print(res10); // 1
+// Operator XOR (#)
+var k = 1 # 0.0;
+print(k); // spodziewane: 1
+
+var l = 0.0 # 0;
+print(l); // spodziewane: 0
+
+var m = 1.0 # 1;
+print(m); // spodziewane: 0
+
+// Kombinacje logiczne z nawiasami
+var n = !(0.0 || 0);
+print(n); // spodziewane: 1
+
+var o = !(1.0 && 1);
+print(o); // spodziewane: 0
+
+var p = !(3.5 # 0);
+print(p); // spodziewane: 0

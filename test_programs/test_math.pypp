@@ -1,48 +1,49 @@
-// Proste operacje
-var res1 = 2 + 3;
-print(res1); // oczekiwane: 5
+// Podstawowe operacje arytmetyczne — int i double
 
-var res2 = 10 - 4;
-print(res2); // oczekiwane: 6
+// int + int
+var a = 5 + 3;
+print(a); // spodziewane: 8
 
-var res3 = 3 * 4;
-print(res3); // oczekiwane: 12
+// double + double
+var b = 2.5 + 4.5;
+print(b); // spodziewane: 7.0
 
-var res4 = 12 / 3;
-print(res4); // oczekiwane: 4
+// int + double
+var c = 3 + 2.2;
+print(c); // spodziewane: 5.2
 
-var res5 = 2 ^ 3;
-print(res5); // oczekiwane: 8
+// double + int
+var d = 1.1 + 4;
+print(d); // spodziewane: 5.1
 
-// Kombinacje bez nawiasów (sprawdzenie priorytetów)
-var res6 = 2 + 3 * 4;
-print(res6); // oczekiwane: 14
+// int - double
+var e = 10 - 2.5;
+print(e); // spodziewane: 7.5
 
-var res7 = 10 - 4 / 2;
-print(res7); // oczekiwane: 8
+// double - int
+var f = 7.7 - 2;
+print(f); // spodziewane: 5.7
 
-var res8 = 2 + 3 * 4 ^ 2;
-print(res8); // oczekiwane: 50  (3 * (4^2) = 48 + 2 = 50)
+// int * double
+var g = 3 * 1.5;
+print(g); // spodziewane: 4.5
 
-var res9 = 2 ^ 3 ^ 2;
-print(res9); // oczekiwane: 512 (2^(3^2) = 2^9 = 512)
+// double * int
+var h = 2.0 * 8;
+print(h); // spodziewane: 16.0
 
-// Kombinacje z nawiasami (zmiana priorytetu)
-var res10 = (2 + 3) * 4;
-print(res10); // oczekiwane: 20
+// int / int
+var i = 9 / 2;
+print(i); // spodziewane: 4
 
-var res11 = (10 - 4) / 2;
-print(res11); // oczekiwane: 3
+// double / int
+var j = 9.0 / 2;
+print(j); // spodziewane: 4.5
 
-var res12 = (2 + 3) * (4 ^ 2);
-print(res12); // oczekiwane: 80  ((2+3)=5 * 16)
+// int / double
+var k = 9 / 2.0;
+print(k); // spodziewane: 4.5
 
-var res13 = (2 ^ 3) ^ 2;
-print(res13); // oczekiwane: 64 ((2^3)=8, 8^2=64)
-
-// Test mieszanych operatorów i wielu nawiasów
-var res14 = ((1 + 2) * (3 + 4)) ^ 2;
-print(res14); // oczekiwane: 441 ((3*7)^2 = 21^2 = 441)
-
-var res15 = 2 + 3 - 1 * 4 / 2;
-print(res15); // oczekiwane: 3 (1 * 4 = 4, 4 / 2 = 2, 2 + 3 - 2 = 3)
+// double / double
+var l = 7.5 / 2.5;
+print(l); // spodziewane: 3.0

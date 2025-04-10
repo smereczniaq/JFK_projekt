@@ -1,36 +1,33 @@
-// Testy logicznego OR (||) — zwraca 1, jeśli co najmniej jeden operand jest prawdziwy (≠ 0)
+// Test logicznego OR (||) z typami int i double
 
-var t = 1;
-var f = 0;
+// int || int
+var a = 0 || 1;
+print(a); // spodziewane: 1
 
-// 1 || 1 => 1
-var res1 = t || t;
-print(res1); // oczekiwane: 1
+// double || double
+var b = 0.0 || 2.2;
+print(b); // spodziewane: 1
 
-// 1 || 0 => 1
-var res2 = t || f;
-print(res2); // oczekiwane: 1
+// double || zero
+var c = 3.14 || 0.0;
+print(c); // spodziewane: 1
 
-// 0 || 1 => 1
-var res3 = f || t;
-print(res3); // oczekiwane: 1
+// zero || double
+var d = 0.0 || 0.0;
+print(d); // spodziewane: 0
 
-// 0 || 0 => 0
-var res4 = f || f;
-print(res4); // oczekiwane: 0
+// int || double
+var e = 0 || 4.5;
+print(e); // spodziewane: 1
 
-// 1 || 1 || 1 => 1
-var res5 = t || t || t;
-print(res5); // oczekiwane: 1
+// double || int
+var f = 1.0 || 0;
+print(f); // spodziewane: 1
 
-// 0 || 0 || 1 => 1
-var res6 = f || f || t;
-print(res6); // oczekiwane: 1
+// zagnieżdżone OR z mixem typów
+var g = 0 || 0.0 || 0 || 5.5;
+print(g); // spodziewane: 1
 
-// 0 || 0 || 0 => 0
-var res7 = f || f || f;
-print(res7); // oczekiwane: 0
-
-// zagnieżdżone z wyrażeniem
-var res8 = (0 + 0) || (1 - 1);
-print(res8); // oczekiwane: 0
+// wszystkie falsy
+var h = 0 || 0.0 || 0;
+print(h); // spodziewane: 0
