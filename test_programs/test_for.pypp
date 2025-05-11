@@ -1,0 +1,4 @@
+var mylist = [10, 20];
+for x in mylist {
+    print(x);
+}

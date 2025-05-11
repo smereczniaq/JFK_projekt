@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 public class LLVMActions extends PyPlusPlusBaseListener {
     private final LLVMGenerator generator = new LLVMGenerator();
@@ -704,6 +705,57 @@ public class LLVMActions extends PyPlusPlusBaseListener {
             generator.addMainInstruction("ret i32 0");
         }
     }
+
+    @Override
+    public void exitWhile_loop(PyPlusPlusParser.While_loopContext ctx) {
+        String condLabel = "while.cond" + generator.nextLabelId();
+        String bodyLabel = "while.body" + generator.nextLabelId();
+        String endLabel = "while.end" + generator.nextLabelId();
+    
+        // Skok do warunku
+        generator.addMainInstruction("br label %" + condLabel);
+    
+        // LABEL: while.cond
+        generator.addMainInstruction(condLabel + ":");
+    
+        // Oblicz warunek — musimy najpierw przetworzyć jego poddrzewo!
+        ParseTreeWalker.DEFAULT.walk(this, ctx.expression());
+    
+        String condReg = values.get(ctx.expression());
+        if (condReg == null) {
+            debug("Brak warunku w pętli while");
+            condReg = "0";
+        }
+    
+        String condType = symbolTable.get(condReg);
+        String cmpReg;
+    
+        if ("double".equals(condType)) {
+            String cond_i1 = generator.nextRegister();
+            generator.addMainInstruction(cond_i1 + " = fcmp une double " + condReg + ", 0.0");
+            cmpReg = cond_i1;
+        } else {
+            String cond_i1 = generator.nextRegister();
+            generator.addMainInstruction(cond_i1 + " = icmp ne i32 " + condReg + ", 0");
+            cmpReg = cond_i1;
+        }
+    
+        generator.addMainInstruction("br i1 " + cmpReg + ", label %" + bodyLabel + ", label %" + endLabel);
+    
+        // LABEL: while.body
+        generator.addMainInstruction(bodyLabel + ":");
+    
+        for (PyPlusPlusParser.StatementContext stmt : ctx.statement()) {
+            ParseTreeWalker.DEFAULT.walk(this, stmt);
+        }
+    
+        // Po ciele pętli, wracamy do sprawdzenia warunku
+        generator.addMainInstruction("br label %" + condLabel);
+    
+        // LABEL: while.end
+        generator.addMainInstruction(endLabel + ":");
+    }
+    
 
     public String getLLVMCode() {
         return generator.generate();

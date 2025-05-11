@@ -5,6 +5,7 @@ public class LLVMGenerator {
     private StringBuilder main = new StringBuilder();
     private int registerCount = 1;
     private int globalStringCounter = 0;
+    private int labelCount = 0;
 
     public LLVMGenerator() {
         header.append("@format = private unnamed_addr constant [4 x i8] c\"%d\\0A\\00\"\n");
@@ -18,6 +19,10 @@ public class LLVMGenerator {
     }
     public String nextRegister() {
         return "%" + registerCount++;
+    }
+
+    public String nextLabelId() {
+        return Integer.toString(labelCount++);
     }
     
     public String nextGlobalString(){

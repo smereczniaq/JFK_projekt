@@ -11,7 +11,6 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        String fileName = "test_programs/test.pypp";
         // String fileName = "test_programs/test_or.pypp";
         // String fileName = "test_programs/test_xor.pypp";
         // String fileName = "test_programs/test_and.pypp";
@@ -22,6 +21,8 @@ public class Main {
         // String fileName = "test_programs/test_read.pypp";
         // String fileName = "test_programs/test_read_contexts.pypp";
         // String fileName = "test_programs/test_errors.pypp";
+        // String fileName = "test_programs/test_while.pypp";
+        String fileName = "test_programs/test_for.pypp";
 
         CharStream input = CharStreams.fromFileName(fileName);
         PyPlusPlusLexer lexer = new PyPlusPlusLexer(input);
