@@ -8,6 +8,7 @@ public class LLVMGenerator {
     private int registerCount = 1;
     private int globalStringCounter = 0;
     private int labelCount = 0;
+    private final StringBuilder functions = new StringBuilder();
 
     public LLVMGenerator() {
         header.append("@format = private unnamed_addr constant [4 x i8] c\"%d\\0A\\00\"\n");
@@ -57,6 +58,11 @@ public class LLVMGenerator {
         main.append("  ").append(instruction).append("\n");
     }
     
+    
+    public void appendFunctionDefinition(String func) {
+        functions.append(func).append("\n");
+    }
+    
     public void declareIntegerVariable(String name) {
         header.append("@").append(name).append(" = global i32 0\n");
     }
@@ -82,6 +88,7 @@ public class LLVMGenerator {
         StringBuilder sb = new StringBuilder();
         sb.append(header);
         sb.append("\n");
+        sb.append(functions);
         sb.append("define i32 @main() {\n");
         sb.append("entry:\n");
         sb.append(main);

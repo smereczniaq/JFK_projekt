@@ -1,0 +1,11 @@
+var x = 3;
+
+if x > 5 {
+    print("większe niż 5");
+}
+else if x == 3 {
+    print("równe 3");
+}
+else {
+    print("inne");
+}

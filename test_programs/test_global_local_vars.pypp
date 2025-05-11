@@ -1,0 +1,24 @@
+var x = 10;        // globalna zmienna x
+var y = 100;       // globalna zmienna y
+
+fun show() {
+    var x = 5;     // lokalna zmienna x (inny zasięg)
+    var y = x + 1;
+    print(x);      // oczekiwane: 5
+    print(y);      // oczekiwane: 6
+}
+
+fun changeGlobal() {
+    x = x + 1;     // modyfikacja globalnej x (nie ma lokalnej)
+    print(x);      // oczekiwane: 11
+}
+
+print(x);          // oczekiwane: 10
+print(y);          // oczekiwane: 100
+
+show();            // test lokalnych x, y
+
+print(x);          // oczekiwane: 10 (nadal)
+print(y);          // oczekiwane: 100 (nadal)
+
+changeGlobal();
