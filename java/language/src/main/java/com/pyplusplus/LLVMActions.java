@@ -4,11 +4,26 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 public class LLVMActions extends PyPlusPlusBaseListener {
+        class LoopContext {
+        String iteratorName;
+        String iterableName;
+        String elementType;
+        String llvmType;
+        String sizeVar;
+        String loopIdx;
+        String loopCondLabel;
+        String loopBodyLabel;
+        String loopEndLabel;
+        int listSize;
+    }
+
+    private final Stack<LoopContext> loopStack = new Stack<>();
     private final LLVMGenerator generator = new LLVMGenerator();
     private final ParseTreeProperty<String> values = new ParseTreeProperty<>();
     Map<String, String> symbolTable = new HashMap<>();
@@ -53,12 +68,12 @@ public class LLVMActions extends PyPlusPlusBaseListener {
     public void exitList_declaration(PyPlusPlusParser.List_declarationContext ctx) {
         String listName = ctx.IDENTIFIER().getText();
         int size = ctx.literal_list().expression().size();
-
+    
         PyPlusPlusParser.ExpressionContext firstExprCtx = ctx.literal_list().expression(0);
         ParseTreeWalker.DEFAULT.walk(this, firstExprCtx);
         String firstReg = values.get(firstExprCtx);
         String firstType = symbolTable.get(firstReg);
-
+    
         String listType;
         if ("double".equals(firstType)) {
             listType = "double";
@@ -69,9 +84,9 @@ public class LLVMActions extends PyPlusPlusBaseListener {
         } else {
             throw new RuntimeException("Nieobsługiwany typ elementów listy.");
         }
-
+    
         symbolTable.put(listName, "list_" + listType);
-
+    
         // Przygotuj elementy
         List<String> elements = new ArrayList<>();
         for (var exprCtx : ctx.literal_list().expression()) {
@@ -94,9 +109,13 @@ public class LLVMActions extends PyPlusPlusBaseListener {
                 throw new RuntimeException("Lista musi być jednorodna typu: " + listType);
             }
         }
-
+    
         generator.declareList(listName, listType, size, elements);
-    }   
+    
+        // WAŻNE: Zapamiętaj rozmiar listy w symbolTable!
+        symbolTable.put(listName + "_size_value", String.valueOf(size));
+    }
+      
 
     @Override
     public void exitList_access(PyPlusPlusParser.List_accessContext ctx) {
@@ -828,6 +847,101 @@ public class LLVMActions extends PyPlusPlusBaseListener {
     
         // LABEL: while.end
         generator.addMainInstruction(endLabel + ":");
+    }
+
+    @Override
+    public void enterFor_loop(PyPlusPlusParser.For_loopContext ctx) {
+        LoopContext loop = new LoopContext();
+    
+        loop.iteratorName = ctx.IDENTIFIER(0).getText();
+        loop.iterableName = ctx.getChild(3).getText();
+    
+        if (!symbolTable.containsKey(loop.iterableName) || !symbolTable.get(loop.iterableName).startsWith("list_")) {
+            throw new RuntimeException("Błąd: '" + loop.iterableName + "' nie jest zadeklarowaną listą.");
+        }
+    
+        loop.elementType = symbolTable.get(loop.iterableName).substring(5);
+    
+        switch (loop.elementType) {
+            case "double":
+                loop.llvmType = "double";
+                generator.declareDoubleVariable(loop.iteratorName);
+                break;
+            case "int":
+                loop.llvmType = "i32";
+                generator.declareIntegerVariable(loop.iteratorName);
+                break;
+            case "string":
+                loop.llvmType = "i8*";
+                generator.declareStringPointerVariable(loop.iteratorName);
+                break;
+            default:
+                throw new RuntimeException("Nieobsługiwany typ elementu: " + loop.elementType);
+        }
+    
+        symbolTable.put(loop.iteratorName, loop.elementType);
+    
+        // Ładowanie rozmiaru listy
+        loop.sizeVar = generator.nextRegister();
+        generator.addMainInstruction(loop.sizeVar + " = load i32, i32* @" + loop.iterableName + "_size");
+    
+        // Inicjalizacja indeksu na stosie
+        loop.loopIdx = generator.nextRegister();
+        generator.addMainInstruction(loop.loopIdx + " = alloca i32");
+        generator.addMainInstruction("store i32 0, i32* " + loop.loopIdx);
+    
+        // Utworzenie labeli
+        loop.loopCondLabel = "for.cond" + generator.nextLabelId();
+        loop.loopBodyLabel = "for.body" + generator.nextLabelId();
+        loop.loopEndLabel = "for.end" + generator.nextLabelId();
+    
+        // Skok do warunku
+        generator.addMainInstruction("br label %" + loop.loopCondLabel);
+    
+        // Warunek pętli
+        generator.addMainInstruction(loop.loopCondLabel + ":");
+        String currentIdx = generator.nextRegister();
+        generator.addMainInstruction(currentIdx + " = load i32, i32* " + loop.loopIdx);
+        String cmp = generator.nextRegister();
+        generator.addMainInstruction(cmp + " = icmp slt i32 " + currentIdx + ", " + loop.sizeVar);
+        generator.addMainInstruction("br i1 " + cmp + ", label %" + loop.loopBodyLabel + ", label %" + loop.loopEndLabel);
+    
+        // Ciało pętli (załaduj iterator przed ciałem!)
+        generator.addMainInstruction(loop.loopBodyLabel + ":");
+    
+        String elemPtr = generator.nextRegister();
+        int listSize = Integer.parseInt(symbolTable.get(loop.iterableName + "_size_value"));
+        loop.listSize = listSize;
+    
+        generator.addMainInstruction(elemPtr + " = getelementptr [" + listSize + " x " + loop.llvmType + "], [" + listSize + " x " + loop.llvmType + "]* @" + loop.iterableName + ", i32 0, i32 " + currentIdx);
+    
+        String elemVal = generator.nextRegister();
+        generator.addMainInstruction(elemVal + " = load " + loop.llvmType + ", " + loop.llvmType + "* " + elemPtr);
+    
+        generator.addMainInstruction("store " + loop.llvmType + " " + elemVal + ", " + loop.llvmType + "* @" + loop.iteratorName);
+    
+        loopStack.push(loop);
+    }
+    
+
+    @Override
+    public void exitFor_loop(PyPlusPlusParser.For_loopContext ctx) {
+        LoopContext loop = loopStack.pop();
+    
+        // Inkrementacja indeksu po ciele pętli
+        String currentIdx = generator.nextRegister();
+        generator.addMainInstruction(currentIdx + " = load i32, i32* " + loop.loopIdx);
+        String nextIdx = generator.nextRegister();
+        generator.addMainInstruction(nextIdx + " = add i32 " + currentIdx + ", 1");
+        generator.addMainInstruction("store i32 " + nextIdx + ", i32* " + loop.loopIdx);
+    
+        // Powrót do warunku
+        generator.addMainInstruction("br label %" + loop.loopCondLabel);
+    
+        // Label końcowy pętli
+        generator.addMainInstruction(loop.loopEndLabel + ":");
+    
+        symbolTable.remove(loop.iteratorName);
     }
     
 

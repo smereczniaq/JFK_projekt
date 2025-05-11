@@ -21,9 +21,9 @@ public class Main {
         // String fileName = "test_programs/test_read.pypp";
         // String fileName = "test_programs/test_read_contexts.pypp";
         // String fileName = "test_programs/test_errors.pypp";
-        String fileName = "test_programs/test_list.pypp";
+        // String fileName = "test_programs/test_list.pypp";
         // String fileName = "test_programs/test_while.pypp";
-        // String fileName = "test_programs/test_for.pypp";
+        String fileName = "test_programs/test_for.pypp";
 
         CharStream input = CharStreams.fromFileName(fileName);
         PyPlusPlusLexer lexer = new PyPlusPlusLexer(input);

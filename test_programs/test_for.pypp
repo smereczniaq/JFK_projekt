@@ -1,4 +1,4 @@
-var mylist = [10, 20];
-for x in mylist {
-    print(x);
+list nums = [1.5, 2.66, 3.12, 4.7543, 5.123];
+for num in nums {
+    print(num);
 }
