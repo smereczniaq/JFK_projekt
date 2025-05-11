@@ -1,0 +1,13 @@
+list numbers = [10, 20, 30, 40, 50];
+list floats = [1.5, 2.5, 3.5];
+list words = ["apple", "banana", "cherry"];
+
+print(numbers[0]);
+print(numbers[1]);
+
+print(floats[0]);
+print(floats[1]);
+
+print(words[0]);
+print(words[1]);
+print(words[2]);

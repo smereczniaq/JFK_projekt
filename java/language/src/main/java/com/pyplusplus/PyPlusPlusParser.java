@@ -1,14 +1,24 @@
 // Generated from PyPlusPlus.g4 by ANTLR 4.13.2
 package com.pyplusplus;
 
-import org.antlr.v4.runtime.atn.*;
-import org.antlr.v4.runtime.dfa.DFA;
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.misc.*;
-import org.antlr.v4.runtime.tree.*;
 import java.util.List;
-import java.util.Iterator;
-import java.util.ArrayList;
+
+import org.antlr.v4.runtime.NoViableAltException;
+import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.RuntimeMetaData;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.Vocabulary;
+import org.antlr.v4.runtime.VocabularyImpl;
+import org.antlr.v4.runtime.atn.ATN;
+import org.antlr.v4.runtime.atn.ATNDeserializer;
+import org.antlr.v4.runtime.atn.ParserATNSimulator;
+import org.antlr.v4.runtime.atn.PredictionContextCache;
+import org.antlr.v4.runtime.dfa.DFA;
+import org.antlr.v4.runtime.tree.ParseTreeListener;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue", "this-escape"})
 public class PyPlusPlusParser extends Parser {
@@ -48,9 +58,9 @@ public class PyPlusPlusParser extends Parser {
 		return new String[] {
 			null, "'fun'", "'('", "','", "')'", "'{'", "'}'", "';'", "'break'", "'continue'", 
 			"'return'", "'while'", "'for'", "'in'", "'if'", "'else'", "'var'", "'='", 
-			"'['", "']'", "'||'", "'#'", "'&&'", "'=='", "'!='", "'<'", "'>'", "'<='", 
-			"'>='", "'+'", "'-'", "'*'", "'/'", "'^'", "'!'", "'int'", "'double'", 
-			"'float'", "'Float32'", "'Float64'", "'string'", "'bool'", "'list'", 
+			"'list'", "'['", "']'", "'||'", "'#'", "'&&'", "'=='", "'!='", "'<'", 
+			"'>'", "'<='", "'>='", "'+'", "'-'", "'*'", "'/'", "'^'", "'!'", "'int'", 
+			"'double'", "'float'", "'Float32'", "'Float64'", "'string'", "'bool'", 
 			"'->'"
 		};
 	}
@@ -154,7 +164,7 @@ public class PyPlusPlusParser extends Parser {
 			setState(54);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 545374947598086L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 545392127991558L) != 0)) {
 				{
 				setState(52);
 				_errHandler.sync(this);
@@ -168,7 +178,8 @@ public class PyPlusPlusParser extends Parser {
 				case T__13:
 				case T__15:
 				case T__17:
-				case T__33:
+				case T__18:
+				case T__34:
 				case IDENTIFIER:
 				case INTEGER:
 				case FLOAT:
@@ -296,7 +307,7 @@ public class PyPlusPlusParser extends Parser {
 			setState(81);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 545374947598084L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 545392127991556L) != 0)) {
 				{
 				{
 				setState(78);
@@ -489,7 +500,7 @@ public class PyPlusPlusParser extends Parser {
 			setState(104);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 545374947508228L) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 545392127639556L) != 0)) {
 				{
 				setState(103);
 				expression();
@@ -552,7 +563,7 @@ public class PyPlusPlusParser extends Parser {
 			setState(114);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 545374947598084L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 545392127991556L) != 0)) {
 				{
 				{
 				setState(111);
@@ -657,7 +668,7 @@ public class PyPlusPlusParser extends Parser {
 			setState(132);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 545374947598084L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 545392127991556L) != 0)) {
 				{
 				{
 				setState(129);
@@ -728,7 +739,7 @@ public class PyPlusPlusParser extends Parser {
 			setState(143);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 545374947598084L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 545392127991556L) != 0)) {
 				{
 				{
 				setState(140);
@@ -759,7 +770,7 @@ public class PyPlusPlusParser extends Parser {
 					setState(154);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
-					while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 545374947598084L) != 0)) {
+					while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 545392127991556L) != 0)) {
 						{
 						{
 						setState(151);
@@ -791,7 +802,7 @@ public class PyPlusPlusParser extends Parser {
 				setState(169);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 545374947598084L) != 0)) {
+				while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 545392127991556L) != 0)) {
 					{
 					{
 					setState(166);
@@ -857,7 +868,7 @@ public class PyPlusPlusParser extends Parser {
 			setState(185);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 545374947508228L) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 545392127639556L) != 0)) {
 				{
 				setState(177);
 				expression();
@@ -980,7 +991,7 @@ public class PyPlusPlusParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(197);
-			match(T__15);
+			match(T__17);
 			setState(198);
 			match(IDENTIFIER);
 			setState(199);
@@ -1031,11 +1042,11 @@ public class PyPlusPlusParser extends Parser {
 			setState(203);
 			match(IDENTIFIER);
 			setState(204);
-			match(T__17);
+			match(T__18);
 			setState(205);
 			expression();
 			setState(206);
-			match(T__18);
+			match(T__19);
 			}
 		}
 		catch (RecognitionException re) {
@@ -1172,11 +1183,11 @@ public class PyPlusPlusParser extends Parser {
 			setState(220);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (_la==T__19) {
+			while (_la==T__20) {
 				{
 				{
 				setState(216);
-				match(T__19);
+				match(T__20);
 				setState(217);
 				xorExpr();
 				}
@@ -1232,11 +1243,11 @@ public class PyPlusPlusParser extends Parser {
 			setState(228);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (_la==T__20) {
+			while (_la==T__21) {
 				{
 				{
 				setState(224);
-				match(T__20);
+				match(T__21);
 				setState(225);
 				logicalAndExpr();
 				}
@@ -1292,11 +1303,11 @@ public class PyPlusPlusParser extends Parser {
 			setState(236);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (_la==T__21) {
+			while (_la==T__22) {
 				{
 				{
 				setState(232);
-				match(T__21);
+				match(T__22);
 				setState(233);
 				comparisonExpr();
 				}
@@ -1352,12 +1363,12 @@ public class PyPlusPlusParser extends Parser {
 			setState(244);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 528482304L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 1056964608L) != 0)) {
 				{
 				{
 				setState(240);
 				_la = _input.LA(1);
-				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 528482304L) != 0)) ) {
+				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 1056964608L) != 0)) ) {
 				_errHandler.recoverInline(this);
 				}
 				else {
@@ -1420,12 +1431,12 @@ public class PyPlusPlusParser extends Parser {
 			setState(252);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (_la==T__28 || _la==T__29) {
+			while (_la==T__29 || _la==T__30) {
 				{
 				{
 				setState(248);
 				_la = _input.LA(1);
-				if ( !(_la==T__28 || _la==T__29) ) {
+				if ( !(_la==T__29 || _la==T__30) ) {
 				_errHandler.recoverInline(this);
 				}
 				else {
@@ -1488,12 +1499,12 @@ public class PyPlusPlusParser extends Parser {
 			setState(260);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (_la==T__30 || _la==T__31) {
+			while (_la==T__31 || _la==T__32) {
 				{
 				{
 				setState(256);
 				_la = _input.LA(1);
-				if ( !(_la==T__30 || _la==T__31) ) {
+				if ( !(_la==T__31 || _la==T__32) ) {
 				_errHandler.recoverInline(this);
 				}
 				else {
@@ -1556,10 +1567,10 @@ public class PyPlusPlusParser extends Parser {
 			setState(266);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if (_la==T__32) {
+			if (_la==T__33) {
 				{
 				setState(264);
-				match(T__32);
+				match(T__33);
 				setState(265);
 				powExpr();
 				}
@@ -1607,17 +1618,17 @@ public class PyPlusPlusParser extends Parser {
 			setState(271);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
-			case T__33:
+			case T__34:
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(268);
-				match(T__33);
+				match(T__34);
 				setState(269);
 				unaryExpr();
 				}
 				break;
 			case T__1:
-			case T__17:
+			case T__18:
 			case IDENTIFIER:
 			case INTEGER:
 			case FLOAT:
@@ -1790,7 +1801,7 @@ public class PyPlusPlusParser extends Parser {
 				match(BOOL);
 				}
 				break;
-			case T__17:
+			case T__18:
 				enterOuterAlt(_localctx, 5);
 				{
 				setState(287);
@@ -1837,7 +1848,7 @@ public class PyPlusPlusParser extends Parser {
 			{
 			setState(290);
 			_la = _input.LA(1);
-			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 8761733283840L) != 0)) ) {
+			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 8727373807616L) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -1888,7 +1899,7 @@ public class PyPlusPlusParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(292);
-			match(T__17);
+			match(T__18);
 			setState(293);
 			expression();
 			setState(298);
@@ -1908,7 +1919,7 @@ public class PyPlusPlusParser extends Parser {
 				_la = _input.LA(1);
 			}
 			setState(301);
-			match(T__18);
+			match(T__19);
 			}
 		}
 		catch (RecognitionException re) {
@@ -1972,10 +1983,10 @@ public class PyPlusPlusParser extends Parser {
 		"\u0005\u0018\u0129\b\u0018\n\u0018\f\u0018\u012c\t\u0018\u0001\u0018\u0001"+
 		"\u0018\u0001\u0018\u0000\u0000\u0019\u0000\u0002\u0004\u0006\b\n\f\u000e"+
 		"\u0010\u0012\u0014\u0016\u0018\u001a\u001c\u001e \"$&(*,.0\u0000\u0004"+
-		"\u0001\u0000\u0017\u001c\u0001\u0000\u001d\u001e\u0001\u0000\u001f \u0001"+
-		"\u0000#*\u0144\u00006\u0001\u0000\u0000\u0000\u0002;\u0001\u0000\u0000"+
-		"\u0000\u0004d\u0001\u0000\u0000\u0000\u0006f\u0001\u0000\u0000\u0000\b"+
-		"l\u0001\u0000\u0000\u0000\nw\u0001\u0000\u0000\u0000\f\u0089\u0001\u0000"+
+		"\u0001\u0000\u0018\u001d\u0001\u0000\u001e\u001f\u0001\u0000 !\u0002\u0000"+
+		"\u0012\u0012$*\u0144\u00006\u0001\u0000\u0000\u0000\u0002;\u0001\u0000"+
+		"\u0000\u0000\u0004d\u0001\u0000\u0000\u0000\u0006f\u0001\u0000\u0000\u0000"+
+		"\bl\u0001\u0000\u0000\u0000\nw\u0001\u0000\u0000\u0000\f\u0089\u0001\u0000"+
 		"\u0000\u0000\u000e\u00af\u0001\u0000\u0000\u0000\u0010\u00bd\u0001\u0000"+
 		"\u0000\u0000\u0012\u00c5\u0001\u0000\u0000\u0000\u0014\u00cb\u0001\u0000"+
 		"\u0000\u0000\u0016\u00d0\u0001\u0000\u0000\u0000\u0018\u00d5\u0001\u0000"+
@@ -2058,25 +2069,25 @@ public class PyPlusPlusParser extends Parser {
 		"\u00c0\u00c2\u0003\u0018\f\u0000\u00c1\u00bf\u0001\u0000\u0000\u0000\u00c1"+
 		"\u00c2\u0001\u0000\u0000\u0000\u00c2\u00c3\u0001\u0000\u0000\u0000\u00c3"+
 		"\u00c4\u0005\u0007\u0000\u0000\u00c4\u0011\u0001\u0000\u0000\u0000\u00c5"+
-		"\u00c6\u0005\u0010\u0000\u0000\u00c6\u00c7\u0005,\u0000\u0000\u00c7\u00c8"+
+		"\u00c6\u0005\u0012\u0000\u0000\u00c6\u00c7\u0005,\u0000\u0000\u00c7\u00c8"+
 		"\u0005\u0011\u0000\u0000\u00c8\u00c9\u00030\u0018\u0000\u00c9\u00ca\u0005"+
 		"\u0007\u0000\u0000\u00ca\u0013\u0001\u0000\u0000\u0000\u00cb\u00cc\u0005"+
-		",\u0000\u0000\u00cc\u00cd\u0005\u0012\u0000\u0000\u00cd\u00ce\u0003\u0018"+
-		"\f\u0000\u00ce\u00cf\u0005\u0013\u0000\u0000\u00cf\u0015\u0001\u0000\u0000"+
+		",\u0000\u0000\u00cc\u00cd\u0005\u0013\u0000\u0000\u00cd\u00ce\u0003\u0018"+
+		"\f\u0000\u00ce\u00cf\u0005\u0014\u0000\u0000\u00cf\u0015\u0001\u0000\u0000"+
 		"\u0000\u00d0\u00d1\u0003\u0018\f\u0000\u00d1\u00d2\u0005\u0011\u0000\u0000"+
 		"\u00d2\u00d3\u0003\u0018\f\u0000\u00d3\u00d4\u0005\u0007\u0000\u0000\u00d4"+
 		"\u0017\u0001\u0000\u0000\u0000\u00d5\u00d6\u0003\u001a\r\u0000\u00d6\u0019"+
 		"\u0001\u0000\u0000\u0000\u00d7\u00dc\u0003\u001c\u000e\u0000\u00d8\u00d9"+
-		"\u0005\u0014\u0000\u0000\u00d9\u00db\u0003\u001c\u000e\u0000\u00da\u00d8"+
+		"\u0005\u0015\u0000\u0000\u00d9\u00db\u0003\u001c\u000e\u0000\u00da\u00d8"+
 		"\u0001\u0000\u0000\u0000\u00db\u00de\u0001\u0000\u0000\u0000\u00dc\u00da"+
 		"\u0001\u0000\u0000\u0000\u00dc\u00dd\u0001\u0000\u0000\u0000\u00dd\u001b"+
 		"\u0001\u0000\u0000\u0000\u00de\u00dc\u0001\u0000\u0000\u0000\u00df\u00e4"+
-		"\u0003\u001e\u000f\u0000\u00e0\u00e1\u0005\u0015\u0000\u0000\u00e1\u00e3"+
+		"\u0003\u001e\u000f\u0000\u00e0\u00e1\u0005\u0016\u0000\u0000\u00e1\u00e3"+
 		"\u0003\u001e\u000f\u0000\u00e2\u00e0\u0001\u0000\u0000\u0000\u00e3\u00e6"+
 		"\u0001\u0000\u0000\u0000\u00e4\u00e2\u0001\u0000\u0000\u0000\u00e4\u00e5"+
 		"\u0001\u0000\u0000\u0000\u00e5\u001d\u0001\u0000\u0000\u0000\u00e6\u00e4"+
 		"\u0001\u0000\u0000\u0000\u00e7\u00ec\u0003 \u0010\u0000\u00e8\u00e9\u0005"+
-		"\u0016\u0000\u0000\u00e9\u00eb\u0003 \u0010\u0000\u00ea\u00e8\u0001\u0000"+
+		"\u0017\u0000\u0000\u00e9\u00eb\u0003 \u0010\u0000\u00ea\u00e8\u0001\u0000"+
 		"\u0000\u0000\u00eb\u00ee\u0001\u0000\u0000\u0000\u00ec\u00ea\u0001\u0000"+
 		"\u0000\u0000\u00ec\u00ed\u0001\u0000\u0000\u0000\u00ed\u001f\u0001\u0000"+
 		"\u0000\u0000\u00ee\u00ec\u0001\u0000\u0000\u0000\u00ef\u00f4\u0003\"\u0011"+
@@ -2093,9 +2104,9 @@ public class PyPlusPlusParser extends Parser {
 		"\u0103\u0106\u0001\u0000\u0000\u0000\u0104\u0102\u0001\u0000\u0000\u0000"+
 		"\u0104\u0105\u0001\u0000\u0000\u0000\u0105%\u0001\u0000\u0000\u0000\u0106"+
 		"\u0104\u0001\u0000\u0000\u0000\u0107\u010a\u0003(\u0014\u0000\u0108\u0109"+
-		"\u0005!\u0000\u0000\u0109\u010b\u0003&\u0013\u0000\u010a\u0108\u0001\u0000"+
-		"\u0000\u0000\u010a\u010b\u0001\u0000\u0000\u0000\u010b\'\u0001\u0000\u0000"+
-		"\u0000\u010c\u010d\u0005\"\u0000\u0000\u010d\u0110\u0003(\u0014\u0000"+
+		"\u0005\"\u0000\u0000\u0109\u010b\u0003&\u0013\u0000\u010a\u0108\u0001"+
+		"\u0000\u0000\u0000\u010a\u010b\u0001\u0000\u0000\u0000\u010b\'\u0001\u0000"+
+		"\u0000\u0000\u010c\u010d\u0005#\u0000\u0000\u010d\u0110\u0003(\u0014\u0000"+
 		"\u010e\u0110\u0003*\u0015\u0000\u010f\u010c\u0001\u0000\u0000\u0000\u010f"+
 		"\u010e\u0001\u0000\u0000\u0000\u0110)\u0001\u0000\u0000\u0000\u0111\u0112"+
 		"\u0005\u0002\u0000\u0000\u0112\u0113\u0003\u0018\f\u0000\u0113\u0114\u0005"+
@@ -2110,12 +2121,12 @@ public class PyPlusPlusParser extends Parser {
 		"\u0000\u0120\u011c\u0001\u0000\u0000\u0000\u0120\u011d\u0001\u0000\u0000"+
 		"\u0000\u0120\u011e\u0001\u0000\u0000\u0000\u0120\u011f\u0001\u0000\u0000"+
 		"\u0000\u0121-\u0001\u0000\u0000\u0000\u0122\u0123\u0007\u0003\u0000\u0000"+
-		"\u0123/\u0001\u0000\u0000\u0000\u0124\u0125\u0005\u0012\u0000\u0000\u0125"+
+		"\u0123/\u0001\u0000\u0000\u0000\u0124\u0125\u0005\u0013\u0000\u0000\u0125"+
 		"\u012a\u0003\u0018\f\u0000\u0126\u0127\u0005\u0003\u0000\u0000\u0127\u0129"+
 		"\u0003\u0018\f\u0000\u0128\u0126\u0001\u0000\u0000\u0000\u0129\u012c\u0001"+
 		"\u0000\u0000\u0000\u012a\u0128\u0001\u0000\u0000\u0000\u012a\u012b\u0001"+
 		"\u0000\u0000\u0000\u012b\u012d\u0001\u0000\u0000\u0000\u012c\u012a\u0001"+
-		"\u0000\u0000\u0000\u012d\u012e\u0005\u0013\u0000\u0000\u012e1\u0001\u0000"+
+		"\u0000\u0000\u0000\u012d\u012e\u0005\u0014\u0000\u0000\u012e1\u0001\u0000"+
 		"\u0000\u0000\u001e46>GJQdhr~\u0084\u008f\u009a\u00a1\u00a9\u00ad\u00b6"+
 		"\u00b9\u00c1\u00dc\u00e4\u00ec\u00f4\u00fc\u0104\u010a\u010f\u0119\u0120"+
 		"\u012a";

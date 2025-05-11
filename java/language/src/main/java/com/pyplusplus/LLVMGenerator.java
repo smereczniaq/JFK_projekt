@@ -1,5 +1,7 @@
 package com.pyplusplus;
 
+import java.util.List;
+
 public class LLVMGenerator {
     private StringBuilder header = new StringBuilder();
     private StringBuilder main = new StringBuilder();
@@ -17,6 +19,7 @@ public class LLVMGenerator {
         header.append("declare i32 @scanf(i8*, ...)\n");
         header.append("declare double @llvm.pow.f64(double, double)\n");
     }
+
     public String nextRegister() {
         return "%" + registerCount++;
     }
@@ -27,6 +30,27 @@ public class LLVMGenerator {
     
     public String nextGlobalString(){
         return "@.str" + globalStringCounter++;
+    }
+
+    public void declareList(String name, String type, int size, List<String> elements) {
+        String llvmType;
+        if ("double".equals(type))
+            llvmType = "double";
+        else if ("int".equals(type))
+            llvmType = "i32";
+        else // string
+            llvmType = "i8*";
+
+        header.append("@").append(name).append(" = global [").append(size).append(" x ").append(llvmType).append("] [");
+
+        for (int i = 0; i < elements.size(); i++) {
+            header.append(elements.get(i));
+            if (i < elements.size() - 1)
+                header.append(", ");
+        }
+
+        header.append("]\n");
+        header.append("@").append(name).append("_size = global i32 ").append(size).append("\n");
     }
     
     public void addMainInstruction(String instruction) {

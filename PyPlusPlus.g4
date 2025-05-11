@@ -29,7 +29,7 @@ function_call: IDENTIFIER '(' (expression (',' expression)*)? ')';
 
 variable_instantiation: 'var' IDENTIFIER ('=' expression)? ';';
 
-list_declaration: 'var' IDENTIFIER '=' literal_list ';';
+list_declaration: 'list' IDENTIFIER '=' literal_list ';';
 
 list_access: IDENTIFIER '[' expression ']';
 

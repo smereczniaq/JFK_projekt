@@ -1,6 +1,8 @@
 package com.pyplusplus;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -46,8 +48,85 @@ public class LLVMActions extends PyPlusPlusBaseListener {
             }
         }
     }
+
+    @Override
+    public void exitList_declaration(PyPlusPlusParser.List_declarationContext ctx) {
+        String listName = ctx.IDENTIFIER().getText();
+        int size = ctx.literal_list().expression().size();
+
+        PyPlusPlusParser.ExpressionContext firstExprCtx = ctx.literal_list().expression(0);
+        ParseTreeWalker.DEFAULT.walk(this, firstExprCtx);
+        String firstReg = values.get(firstExprCtx);
+        String firstType = symbolTable.get(firstReg);
+
+        String listType;
+        if ("double".equals(firstType)) {
+            listType = "double";
+        } else if ("int".equals(firstType)) {
+            listType = "int";
+        } else if ("string".equals(firstType)) {
+            listType = "string";
+        } else {
+            throw new RuntimeException("Nieobsługiwany typ elementów listy.");
+        }
+
+        symbolTable.put(listName, "list_" + listType);
+
+        // Przygotuj elementy
+        List<String> elements = new ArrayList<>();
+        for (var exprCtx : ctx.literal_list().expression()) {
+            String literalValue = exprCtx.getText();
+            if (listType.equals("int") && literalValue.matches("\\d+")) {
+                elements.add("i32 " + literalValue);
+            } else if (listType.equals("double") && literalValue.matches("\\d+(\\.\\d+)?")) {
+                if (!literalValue.contains(".")) literalValue += ".0";
+                elements.add("double " + literalValue);
+            } else if (listType.equals("string") && literalValue.startsWith("\"") && literalValue.endsWith("\"")) {
+                String strReg = generator.nextGlobalString();
+                String content = literalValue.substring(1, literalValue.length() - 1);
+                int len = content.length() + 1;
+                String llvmStr = content.replace("\\n", "\\0A")
+                                        .replace("\\t", "\\09")
+                                        .replace("\"", "\\22") + "\\00";
+                generator.declareStringConstant(strReg, len, llvmStr);
+                elements.add("i8* getelementptr inbounds ([" + len + " x i8], [" + len + " x i8]* " + strReg + ", i32 0, i32 0)");
+            } else {
+                throw new RuntimeException("Lista musi być jednorodna typu: " + listType);
+            }
+        }
+
+        generator.declareList(listName, listType, size, elements);
+    }   
+
+    @Override
+    public void exitList_access(PyPlusPlusParser.List_accessContext ctx) {
+        String listName = ctx.IDENTIFIER().getText();
+        ParseTreeWalker.DEFAULT.walk(this, ctx.expression());
+        String indexReg = values.get(ctx.expression());
     
-     
+        if (!symbolTable.containsKey(listName) || !symbolTable.get(listName).startsWith("list_")) {
+            throw new RuntimeException("Błąd: '" + listName + "' nie jest zadeklarowaną listą.");
+        }
+    
+        String listType = symbolTable.get(listName).substring(5);
+        String llvmType;
+        if ("double".equals(listType))
+            llvmType = "double";
+        else if ("int".equals(listType))
+            llvmType = "i32";
+        else
+            llvmType = "i8*";
+    
+        int size = 0; // w praktyce zapisz realny rozmiar w symbolTable podczas deklaracji
+    
+        String elemPtr = generator.nextRegister();
+        String elemVal = generator.nextRegister();
+        generator.addMainInstruction(elemPtr + " = getelementptr [" + size + " x " + llvmType + "], [" + size + " x " + llvmType + "]* @" + listName + ", i32 0, i32 " + indexReg);
+        generator.addMainInstruction(elemVal + " = load " + llvmType + ", " + llvmType + "* " + elemPtr);
+    
+        values.put(ctx, elemVal);
+        symbolTable.put(elemVal, listType);
+    }
 
     @Override
     public void exitValue_assignment(PyPlusPlusParser.Value_assignmentContext ctx) {
@@ -627,21 +706,16 @@ public class LLVMActions extends PyPlusPlusBaseListener {
                         String dummy = generator.nextRegister();
     
                         if ("double".equals(type)) {
-                            generator.addMainInstruction(
-                                dummy + " = call i32 (i8*, ...) @printf(i8* getelementptr inbounds " +
-                                "([4 x i8], [4 x i8]* @format_double, i32 0, i32 0), double " + argValue + ")"
-                            );
+                            generator.addMainInstruction(dummy + " = call i32 (i8*, ...) @printf(i8* getelementptr inbounds " +
+                                "([4 x i8], [4 x i8]* @format_double, i32 0, i32 0), double " + argValue + ")");
                         } else if ("string".equals(type)) {
-                            generator.addMainInstruction(
-                                dummy + " = call i32 (i8*, ...) @printf(i8* getelementptr inbounds " +
-                                "([4 x i8], [4 x i8]* @format_string, i32 0, i32 0), i8* " + argValue + ")"
-                            );
+                            generator.addMainInstruction(dummy + " = call i32 (i8*, ...) @printf(i8* getelementptr inbounds " +
+                                "([4 x i8], [4 x i8]* @format_string, i32 0, i32 0), i8* " + argValue + ")");
                         } else {
-                            generator.addMainInstruction(
-                                dummy + " = call i32 (i8*, ...) @printf(i8* getelementptr inbounds " +
-                                "([4 x i8], [4 x i8]* @format, i32 0, i32 0), i32 " + argValue + ")"
-                            );
+                            generator.addMainInstruction(dummy + " = call i32 (i8*, ...) @printf(i8* getelementptr inbounds " +
+                                "([4 x i8], [4 x i8]* @format, i32 0, i32 0), i32 " + argValue + ")");
                         }
+                        
                     } else {
                         debug("Brak wartości do wypisania w print()");
                     }
