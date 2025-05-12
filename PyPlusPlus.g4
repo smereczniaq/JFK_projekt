@@ -42,8 +42,11 @@ logicalAndExpr: comparisonExpr ('&&' comparisonExpr)*;
 comparisonExpr: addExpr (('==' | '!=' | '<' | '>' | '<=' | '>=') addExpr)*;
 addExpr: mulExpr (('+' | '-') mulExpr)*;
 mulExpr: powExpr (('*' | '/') powExpr)*;
-powExpr: unaryExpr ('^' powExpr)?;      // <- prawostronna rekurencja = prawoasocjacyjność!
-unaryExpr: '!' unaryExpr | primary;
+powExpr: unaryExpr ('^' powExpr)?;
+unaryExpr: '-' unaryExpr
+         | '!' unaryExpr
+         | primary;
+
 primary
     : '(' expression ')'
     | list_access

@@ -660,40 +660,51 @@ public class LLVMActions extends PyPlusPlusBaseListener {
 
     @Override
     public void exitUnaryExpr(PyPlusPlusParser.UnaryExprContext ctx) {
-        if (ctx.getChildCount() == 2 && ctx.getChild(0).getText().equals("!")) {
-            if (ctx.unaryExpr() == null) {
-                debug("Brak operandu dla operatora !");
-                return;
-            }
-    
+        if (ctx.getChildCount() == 2) {
+            String op = ctx.getChild(0).getText();
             String operand = values.get(ctx.unaryExpr());
     
             if (operand == null) {
-                debug("Operand ! nie ma wartości");
+                debug("Operand unaryExpr nie ma wartości");
                 return;
             }
     
-            String operandType = symbolTable.get(operand);
-            boolean isDouble = "double".equals(operandType);
+            String type = symbolTable.get(operand);
+            String result = generator.nextRegister();
     
-            // Konwersja do boola
-            String condition = generator.nextRegister();
-            if (isDouble) {
-                addInstruction(condition + " = fcmp une double " + operand + ", 0.0");
-            } else {
-                addInstruction(condition + " = icmp ne i32 " + operand + ", 0");
+            switch (op) {
+                case "!":
+                    boolean isDouble = "double".equals(type);
+                    String condition = generator.nextRegister();
+                    if (isDouble) {
+                        addInstruction(condition + " = fcmp une double " + operand + ", 0.0");
+                    } else {
+                        addInstruction(condition + " = icmp ne i32 " + operand + ", 0");
+                    }
+    
+                    String notResult = generator.nextRegister();
+                    addInstruction(notResult + " = xor i1 " + condition + ", true");
+    
+                    addInstruction(result + " = zext i1 " + notResult + " to i32");
+                    symbolTable.put(result, "int");
+                    break;
+    
+                case "-":
+                    if ("double".equals(type)) {
+                        addInstruction(result + " = fsub double 0.0, " + operand);
+                        symbolTable.put(result, "double");
+                    } else {
+                        addInstruction(result + " = sub i32 0, " + operand);
+                        symbolTable.put(result, "int");
+                    }
+                    break;
+    
+                default:
+                    debug("Nieznany operator unarny: " + op);
+                    return;
             }
     
-            // Negacja logiczna (odwrócenie wartości boola)
-            String notResult = generator.nextRegister();
-            addInstruction(notResult + " = xor i1 " + condition + ", true");
-    
-            // Rozszerzenie i1 -> i32
-            String finalResult = generator.nextRegister();
-            addInstruction(finalResult + " = zext i1 " + notResult + " to i32");
-    
-            values.put(ctx, finalResult);
-            symbolTable.put(finalResult, "int"); // wynik negacji to int (0/1)
+            values.put(ctx, result);
         }
     
         else if (ctx.primary() != null) {
@@ -1105,6 +1116,68 @@ public class LLVMActions extends PyPlusPlusBaseListener {
 
         currentFunction = null;
         localAllocas.clear();
+    }
+
+    @Override
+    public void exitIf_statement(PyPlusPlusParser.If_statementContext ctx) {
+        String labelId = generator.nextLabelId();
+        String endLabel = "if.end" + labelId;
+
+        List<String> condLabels = new ArrayList<>();
+        List<String> bodyLabels = new ArrayList<>();
+
+        // Główne if + wszystkie else-if
+        int totalConds = 1 + ctx.expression().size() - 1;
+
+        for (int i = 0; i < totalConds; i++) {
+            condLabels.add("if.cond" + labelId + "." + i);
+            bodyLabels.add("if.body" + labelId + "." + i);
+        }
+
+        String elseLabel = ctx.getChild(ctx.getChildCount() - 2).getText().equals("else") ?
+            "if.else" + labelId : null;
+
+        // Skok do pierwszego warunku
+        addInstruction("br label %" + condLabels.get(0));
+
+        // Główne if i else-if
+        for (int i = 0; i < totalConds; i++) {
+            addInstruction(condLabels.get(i) + ":");
+            ParseTreeWalker.DEFAULT.walk(this, ctx.expression(i));
+
+            String condReg = values.get(ctx.expression(i));
+            String condType = symbolTable.get(condReg);
+            String cmpReg;
+
+            if ("double".equals(condType)) {
+                cmpReg = generator.nextRegister();
+                addInstruction(cmpReg + " = fcmp une double " + condReg + ", 0.0");
+            } else {
+                cmpReg = generator.nextRegister();
+                addInstruction(cmpReg + " = icmp ne i32 " + condReg + ", 0");
+            }
+
+            String nextCondLabel = (i + 1 < totalConds)
+                ? condLabels.get(i + 1)
+                : (elseLabel != null ? elseLabel : endLabel);
+
+            addInstruction("br i1 " + cmpReg + ", label %" + bodyLabels.get(i) + ", label %" + nextCondLabel);
+
+            // Ciało warunku
+            addInstruction(bodyLabels.get(i) + ":");
+            ParseTreeWalker.DEFAULT.walk(this, ctx.statement(i));
+            addInstruction("br label %" + endLabel);
+        }
+
+        // Else (jeśli istnieje)
+        if (elseLabel != null) {
+            addInstruction(elseLabel + ":");
+            ParseTreeWalker.DEFAULT.walk(this, ctx.statement(ctx.statement().size() - 1));
+            addInstruction("br label %" + endLabel);
+        }
+
+        // Zakończenie if
+        addInstruction(endLabel + ":");
     }
     
 

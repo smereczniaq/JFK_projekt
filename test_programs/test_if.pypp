@@ -1,11 +1,11 @@
-var x = 3;
+var x = 0;
 
-if x > 5 {
-    print("większe niż 5");
+if x > 0 {
+    print("> 0");
 }
-else if x == 3 {
-    print("równe 3");
+else if x == 0 {
+    print("== 0");
 }
 else {
-    print("inne");
+    print("< 0");
 }
