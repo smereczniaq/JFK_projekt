@@ -5,9 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
+import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+
+/** Simple generic pair so we can track fieldName→fieldType without extra deps */
+
 
 public class LLVMActions extends PyPlusPlusBaseListener {
         class LoopContext {
@@ -28,13 +33,15 @@ public class LLVMActions extends PyPlusPlusBaseListener {
     private final Map<String, List<String>> functionParams = new HashMap<>();
     private final Map<String, String> functionReturnTypes = new HashMap<>();
     private final Map<String, String> localAllocas = new HashMap<>();
-
+    private final Map<String, List<Pair<String,String>>> structFields = new HashMap<>();
 
     private final Stack<LoopContext> loopStack = new Stack<>();
     private final LLVMGenerator generator = new LLVMGenerator();
     private final ParseTreeProperty<String> values = new ParseTreeProperty<>();
     Map<String, String> symbolTable = new HashMap<>();
+    private String currentClass = null;
 
+    
     private void debug(String msg) {
         System.err.println("[DEBUG] " + msg);
     }
@@ -46,7 +53,82 @@ public class LLVMActions extends PyPlusPlusBaseListener {
             functionBodies.get(currentFunction).append("  ").append(instruction).append("\n");
         }
     }
+
+    private static class ClassContext {
+        List<Pair<String,String>> fields = new ArrayList<>();
+        List<String> methods = new ArrayList<>();
+    }
+    private final Map<String, ClassContext> classContexts = new HashMap<>();
     
+    /** map our language types (incl. structs/classes) to LLVM */
+    private String llvmTypeFromLangType(String type) {
+        switch (type) {
+            case "int":    return "i32";
+            case "double": return "double";
+            case "string": return "i8*";
+            case "bool":   return "i1";
+            default:
+                // user‐defined → struct or class
+                if (structFields.containsKey(type) || classContexts.containsKey(type)) {
+                    return "%" + type;
+                }
+                throw new RuntimeException("Unknown type: " + type);
+        }
+    }
+
+    @Override
+    public void exitStruct_definition(PyPlusPlusParser.Struct_definitionContext ctx) {
+        String structName = ctx.IDENTIFIER().getText();
+        List<Pair<String,String>> fields = new ArrayList<>();
+
+        for (var m : ctx.struct_member()) {
+            String fieldType = m.type().getText();
+            String fieldName = m.IDENTIFIER().getText();
+            fields.add(new Pair<>(fieldName, fieldType));
+        }
+        structFields.put(structName, fields);
+
+        // Build LLVM type list
+        List<String> llvmFieldTypes = fields.stream()
+        .map(f -> llvmTypeFromLangType(f.b))  // use .b instead of getRight()
+        .collect(Collectors.toList());
+        generator.declareStructType(structName, llvmFieldTypes);
+
+    
+
+        // Emit "%StructName = type { ... }"
+        generator.declareStructType(structName, llvmFieldTypes);
+    }
+
+
+    @Override
+    public void exitClass_definition(PyPlusPlusParser.Class_definitionContext ctx) {
+        String className = ctx.IDENTIFIER().getText();
+        ClassContext cc = new ClassContext();
+
+        for (var member : ctx.class_member()) {
+            if (member.variable_instantiation() != null) {
+                var vi = member.variable_instantiation();
+                String fieldType = vi.expression() != null
+                    ? symbolTable.get(values.get(vi.expression()))
+                    : vi.IDENTIFIER().getText();  // or pull from grammar if you later add typed var
+                String fieldName = vi.IDENTIFIER().getText();
+                cc.fields.add(new Pair<>(fieldName, fieldType));
+            }
+            else if (member.function_definition() != null) {
+                String mname = member.function_definition().IDENTIFIER(0).getText();
+                cc.methods.add(mname);
+            }
+        }
+        classContexts.put(className, cc);
+
+        List<String> llvmFieldTypes = cc.fields.stream()
+        .map(f -> llvmTypeFromLangType(f.b))  // use .b instead of getRight()
+        .collect(Collectors.toList());
+        generator.declareStructType(className, llvmFieldTypes);
+
+    }
+
 
     @Override
     public void exitVariable_instantiation(PyPlusPlusParser.Variable_instantiationContext ctx) {

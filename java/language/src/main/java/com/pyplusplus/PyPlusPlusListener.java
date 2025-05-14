@@ -1,6 +1,5 @@
 // Generated from PyPlusPlus.g4 by ANTLR 4.13.2
 package com.pyplusplus;
-
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
 /**
@@ -18,6 +17,56 @@ public interface PyPlusPlusListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitProg(PyPlusPlusParser.ProgContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PyPlusPlusParser#type}.
+	 * @param ctx the parse tree
+	 */
+	void enterType(PyPlusPlusParser.TypeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PyPlusPlusParser#type}.
+	 * @param ctx the parse tree
+	 */
+	void exitType(PyPlusPlusParser.TypeContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PyPlusPlusParser#struct_definition}.
+	 * @param ctx the parse tree
+	 */
+	void enterStruct_definition(PyPlusPlusParser.Struct_definitionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PyPlusPlusParser#struct_definition}.
+	 * @param ctx the parse tree
+	 */
+	void exitStruct_definition(PyPlusPlusParser.Struct_definitionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PyPlusPlusParser#struct_member}.
+	 * @param ctx the parse tree
+	 */
+	void enterStruct_member(PyPlusPlusParser.Struct_memberContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PyPlusPlusParser#struct_member}.
+	 * @param ctx the parse tree
+	 */
+	void exitStruct_member(PyPlusPlusParser.Struct_memberContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PyPlusPlusParser#class_definition}.
+	 * @param ctx the parse tree
+	 */
+	void enterClass_definition(PyPlusPlusParser.Class_definitionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PyPlusPlusParser#class_definition}.
+	 * @param ctx the parse tree
+	 */
+	void exitClass_definition(PyPlusPlusParser.Class_definitionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PyPlusPlusParser#class_member}.
+	 * @param ctx the parse tree
+	 */
+	void enterClass_member(PyPlusPlusParser.Class_memberContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PyPlusPlusParser#class_member}.
+	 * @param ctx the parse tree
+	 */
+	void exitClass_member(PyPlusPlusParser.Class_memberContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link PyPlusPlusParser#function_definition}.
 	 * @param ctx the parse tree
@@ -238,16 +287,6 @@ public interface PyPlusPlusListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitLiteral(PyPlusPlusParser.LiteralContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link PyPlusPlusParser#type}.
-	 * @param ctx the parse tree
-	 */
-	void enterType(PyPlusPlusParser.TypeContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link PyPlusPlusParser#type}.
-	 * @param ctx the parse tree
-	 */
-	void exitType(PyPlusPlusParser.TypeContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link PyPlusPlusParser#literal_list}.
 	 * @param ctx the parse tree

@@ -1,8 +1,31 @@
 grammar PyPlusPlus;
 
-prog: (statement | function_definition)* EOF;
+prog: (struct_definition | class_definition | function_definition | statement)* EOF;
 
-function_definition: 'fun' (ARROW type)? IDENTIFIER '(' (IDENTIFIER (',' IDENTIFIER)*)? ')' '{' statement* '}';
+
+type: 'int' | 'double' | 'float' | 'Float32' | 'Float64' | 'string' | 'bool' | 'list' | IDENTIFIER; // allow user types
+
+struct_definition
+    : 'struct' IDENTIFIER '{' struct_member* '}' ';'
+    ;
+
+struct_member
+    : type IDENTIFIER ('=' expression)? ';'
+    ;
+
+// Class definitions
+class_definition
+    : 'class' IDENTIFIER '{' class_member* '}' ';'
+    ;
+
+class_member
+    : variable_instantiation
+    | function_definition
+    ;
+
+function_definition
+    : 'fun' (ARROW type)? IDENTIFIER '(' (IDENTIFIER (',' IDENTIFIER)*)? ')' '{' statement* '}'
+    ;
 
 statement
     : while_loop
@@ -23,7 +46,11 @@ while_loop: 'while' expression '{' statement* '}';
 
 for_loop: 'for' IDENTIFIER 'in' (IDENTIFIER | function_call | STRING | literal_list) '{' statement* '}';
 
-if_statement: 'if' expression '{' statement* '}' ( 'else' 'if' expression '{' statement* '}' )* ( 'else' '{' statement* '}' )?;
+if_statement
+    : 'if' expression '{' statement* '}'
+      ( 'else' 'if' expression '{' statement* '}' )*
+      ( 'else' '{' statement* '}' )?
+    ;
 
 function_call: IDENTIFIER '(' (expression (',' expression)*)? ')';
 
@@ -36,6 +63,7 @@ list_access: IDENTIFIER '[' expression ']';
 value_assignment: expression '=' expression ';';
 
 expression : logicalOrExpr;
+
 logicalOrExpr: xorExpr ('||' xorExpr)*;
 xorExpr: logicalAndExpr ('#' logicalAndExpr)*;
 logicalAndExpr: comparisonExpr ('&&' comparisonExpr)*;
@@ -56,8 +84,6 @@ primary
     ;
 
 literal: INTEGER | FLOAT | STRING | BOOL | literal_list;
-
-type: 'int' | 'double' | 'float' | 'Float32' | 'Float64' | 'string' | 'bool' | 'list';
 
 literal_list: '[' expression (',' expression)* ']';
 

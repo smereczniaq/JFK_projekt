@@ -26,7 +26,8 @@ public class Main {
         // String fileName = "test_programs/test_for.pypp";
         // String fileName = "test_programs/test_function.pypp";
         // String fileName = "test_programs/test_global_local_vars.pypp";
-        String fileName = "test_programs/test_if.pypp";
+        // String fileName = "test_programs/test_if.pypp";
+        String fileName = "test_programs/class_struct.pypp";
 
         CharStream input = CharStreams.fromFileName(fileName);
         PyPlusPlusLexer lexer = new PyPlusPlusLexer(input);

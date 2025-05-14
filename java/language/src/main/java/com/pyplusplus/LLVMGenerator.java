@@ -84,6 +84,10 @@ public class LLVMGenerator {
         header.append("@").append(name).append(" = global i8* null\n");
     }
     
+    public void declareStructType(String name, List<String> fieldTypes) {
+        // should emit: "%"+name+" = type { "+String.join(", ", fieldTypes)+" }"
+    }
+    
     public String generate() {
         StringBuilder sb = new StringBuilder();
         sb.append(header);
